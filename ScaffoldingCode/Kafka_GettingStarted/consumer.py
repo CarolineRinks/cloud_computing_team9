@@ -1,52 +1,62 @@
-#
-#
-# Author: Aniruddha Gokhale
-# CS4287-5287: Principles of Cloud Computing, Vanderbilt University
-#
-# Created: Sept 6, 2020
-#
-# Purpose:
-#
-#    Demonstrate the use of Kafka Python streaming APIs.
-#    In this example, demonstrate Kafka streaming API to build a consumer.
-#
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Author: Your Name
+Course: CS4287-5287: Principles of Cloud Computing, Vanderbilt University
+Purpose:
+    Simple Kafka Consumer for Testing.
+    This script connects to a Kafka broker, subscribes to the specified topic,
+    consumes JSON messages, and prints out the 'ID' and 'GroundTruth' fields.
+"""
 
-import os   # need this for popen
-import time # for sleep
-from kafka import KafkaConsumer  # consumer of events
+import json
+from kafka import KafkaConsumer  # Consumer of events
+import base64
+from io import BytesIO
+from PIL import Image,ImageFilter
+# Replace with your Kafka broker's IP and port
+bootstrap_servers = '192.168.5.224:9092'
 
-# We can make this more sophisticated/elegant but for now it is just
-# hardcoded to the setup I have on my local VMs
+# Replace with the topic name you used in your producer
+topic_name = 'cifar'
 
-# acquire the consumer
-# (you will need to change this to your bootstrap server's IP addr)
-consumer = KafkaConsumer (bootstrap_servers="localhost:9092")
+# Initialize the Kafka consumer
+consumer = KafkaConsumer(
+    topic_name,
+    bootstrap_servers=bootstrap_servers,
+    auto_offset_reset='earliest',  # Start reading from the earliest message
+    enable_auto_commit=True,
+    group_id='simple-consumer-group',
+    value_deserializer=lambda m: json.loads(m.decode('utf-8'))  # Deserialize JSON messages
+)
 
-# subscribe to topic
-consumer.subscribe (topics=["utilizations"])
+print("Consumer is listening for messages...")
 
-# we keep reading and printing
-for msg in consumer:
-    # what we get is a record. From this record, we are interested in printing
-    # the contents of the value field. We are sure that we get only the
-    # utilizations topic because that is the only topic we subscribed to.
-    # Otherwise we will need to demultiplex the incoming data according to the
-    # topic coming in.
-    #
-    # convert the value field into string (ASCII)
-    #
-    # Note that I am not showing code to obtain the incoming data as JSON
-    # nor am I showing any code to connect to a backend database sink to
-    # dump the incoming data. You will have to do that for the assignment.
-    print (str(msg.value, 'ascii'))
+# Process messages as they arrive
+try:
+    for msg in consumer:
+        # The message value is already deserialized into a Python dict
+        data = msg.value
 
-# we are done. As such, we are not going to get here as the above loop
-# is a forever loop.
-consumer.close ()
-    
+        # Extract the fields
+        unique_id = data.get('ID')
+        ground_truth = data.get('GroundTruth')
+        img_base64=data.get('Data')
 
+        # Print the basic information
+        print(f"Received message with ID: {unique_id}, GroundTruth: {ground_truth}")
+        # Optionally, decode and save the image
+        img_bytes = base64.b64decode(img_base64)
+        image = Image.open(BytesIO(img_bytes))
+        image_filename = f"{unique_id}_{ground_truth}.png"
+        image.save(image_filename)
+        print(f"Image saved as {image_filename}")
 
+        # You can add additional prints or processing here if needed
 
-
-
+except KeyboardInterrupt:
+    print("Consumer stopped.")
+finally:
+    # Close the consumer gracefully
+    consumer.close()
 
