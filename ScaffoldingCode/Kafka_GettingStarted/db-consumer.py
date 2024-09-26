@@ -57,6 +57,7 @@ try:
         print(f"Image saved as {image_filename}")
 
         # You can add additional prints or processing here if needed
+        
 
 except KeyboardInterrupt:
     print("Consumer stopped.")
