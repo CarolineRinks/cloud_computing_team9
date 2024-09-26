@@ -1,6 +1,7 @@
 # Fall 2024
 # Principles of Cloud Computing: Team 9
-# Code for the inference consumer
+# Code for the ML model -- also included in inference-consumer.py
+# this file was used for testing.
 
 import torch
 import numpy as np

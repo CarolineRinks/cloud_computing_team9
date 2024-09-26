@@ -56,7 +56,7 @@ try:
         image.save(image_filename)
         print(f"Image saved as {image_filename}")
 
-        # You can add additional prints or processing here if needed
+        # Add additional prints or processing here if needed
 
 except KeyboardInterrupt:
     print("Consumer stopped.")
