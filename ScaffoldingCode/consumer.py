@@ -37,7 +37,7 @@ try:
     for msg in consumer:
         # The message value is already deserialized into a Python dict
         data = msg.value
-
+        
         # Extract the fields
         unique_id = data.get('ID')
         ground_truth = data.get('GroundTruth')
@@ -52,7 +52,7 @@ try:
         image.save(image_filename)
         print(f"Image saved as {image_filename}")
 
-        # You can add additional prints or processing here if needed
+        # Add additional prints or processing here if needed
 
 except KeyboardInterrupt:
     print("Consumer stopped.")
