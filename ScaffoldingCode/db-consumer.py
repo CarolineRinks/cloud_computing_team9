@@ -9,7 +9,7 @@ from io import BytesIO
 from PIL import Image
 from pymongo import MongoClient
 import os  # Import the os module
-
+#
 # Replace with your Kafka broker's IP and port
 bootstrap_servers = '192.168.5.224:9092'
 
