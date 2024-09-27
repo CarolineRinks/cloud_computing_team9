@@ -1,5 +1,6 @@
 #
 #
+#
 # Author: Team 9
 # CS4287-5287: Principles of Cloud Computing, Vanderbilt University
 #
@@ -44,6 +45,7 @@ cifar10_labels = {
     8: 'ship',
     9: 'truck'
 }
+
 
 # acquire the producer
 producer = KafkaProducer (bootstrap_servers="192.168.5.224:9092", 

@@ -36,12 +36,8 @@ print("Consumer is listening for messages...")
 try:
     for msg in consumer:
         # The message value is already deserialized into a Python dict
-        print("msg: ",msg)
-
         data = msg.value
-
-        print("data ",data)
-
+        
         # Extract the fields
         unique_id = data.get('ID')
         ground_truth = data.get('GroundTruth')

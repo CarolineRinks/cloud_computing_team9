@@ -1,67 +1,131 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Author: Your Name
-Course: CS4287-5287: Principles of Cloud Computing, Vanderbilt University
-Purpose:
-    Simple Kafka Consumer for Testing.
-    This script connects to a Kafka broker, subscribes to the specified topic,
-    consumes JSON messages, and prints out the 'ID' and 'GroundTruth' fields.
-"""
 
 import json
+import threading
 from kafka import KafkaConsumer  # Consumer of events
 import base64
 from io import BytesIO
-from PIL import Image,ImageFilter
+from PIL import Image
+from pymongo import MongoClient
+import os  # Import the os module
+
 # Replace with your Kafka broker's IP and port
 bootstrap_servers = '192.168.5.224:9092'
 
-# Replace with the topic name you used in your producer
-topic_name = 'cifar'
+# Replace with the topic names used in your producer and inference producer
+db_topic_name = 'cifar'
+inference_topic_name = 'inference'
 
-# Initialize the Kafka consumer
-consumer = KafkaConsumer(
-    topic_name,
-    bootstrap_servers=bootstrap_servers,
-    auto_offset_reset='earliest',  # Start reading from the earliest message
-    enable_auto_commit=True,
-    group_id='simple-consumer-group',
-    value_deserializer=lambda m: json.loads(m.decode('utf-8'))  # Deserialize JSON messages
-)
+# Connect to MongoDB on localhost (default port 27017)
+client = MongoClient('mongodb://localhost:27017/')
 
-print("Consumer is listening for messages...")
+# Access the database
+db = client['cifarDatabase']
 
-# Process messages as they arrive
-try:
-    for msg in consumer:
-        # The message value is already deserialized into a Python dict
-        print("msg: ",msg)
+# Access the collection
+collection = db['myCollection']
 
-        data = msg.value
+# Create a new directory for images if it doesn't exist
+image_folder = 'image_folder'
+if not os.path.exists(image_folder):
+    os.makedirs(image_folder)
 
-        print("data ",data)
+# Function to handle saving images and inserting into the database
+def handle_db_consumer_message(data):
+    # Insert the document into MongoDB
+    result = collection.insert_one(data)
+    print(f"Inserted document with _id: {result.inserted_id}")
 
-        # Extract the fields
-        unique_id = data.get('ID')
-        ground_truth = data.get('GroundTruth')
-        img_base64=data.get('Data')
+    # Extract the fields
+    unique_id = data.get('ID')
+    ground_truth = data.get('GroundTruth')
+    img_base64 = data.get('Data')
 
-        # Print the basic information
-        print(f"Received message with ID: {unique_id}, GroundTruth: {ground_truth}")
-        # Optionally, decode and save the image
-        img_bytes = base64.b64decode(img_base64)
-        image = Image.open(BytesIO(img_bytes))
-        image_filename = f"{unique_id}_{ground_truth}.png"
-        image.save(image_filename)
-        print(f"Image saved as {image_filename}")
+    # Decode and save the image
+    img_bytes = base64.b64decode(img_base64)
+    image = Image.open(BytesIO(img_bytes))
+    # Save the image in the new folder
+    image_filename = os.path.join(image_folder, f"{unique_id}_{ground_truth}.png")
+    image.save(image_filename)
+    print(f"Image saved as {image_filename}")
 
-        # You can add additional prints or processing here if needed
-        
+# Function to handle inference data and update the MongoDB document
+def handle_inference_consumer_message(data):
+    # Extract the fields
+    unique_id = data.get('ID')
+    prediction = data.get('InferredValue')
 
-except KeyboardInterrupt:
-    print("Consumer stopped.")
-finally:
-    # Close the consumer gracefully
-    consumer.close()
+    # Find the document with the matching ID and update it with the predicted label
+    result = collection.update_one(
+        {'ID': unique_id},   # Filter by unique ID
+        {'$set': {'InferredValue': prediction}}  # Set the prediction
+    )
+    print("prediction data", prediction)
+    if result.modified_count > 0:
+        print(f"Updated document with ID: {unique_id} with prediction: {prediction}")
+    else:
+        print(f"No document found with ID: {unique_id} to update.")
 
+# Consumer thread for IoT (db_consumer) messages
+def consume_db_messages():
+    # Initialize the Kafka consumer
+    db_consumer = KafkaConsumer(
+        db_topic_name,
+        bootstrap_servers=bootstrap_servers,
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
+        group_id='db-consumer-group',
+        value_deserializer=lambda m: json.loads(m.decode('utf-8'))  # Deserialize JSON messages
+    )
+    
+    print("DB Consumer is listening for messages...")
+    
+    try:
+        for msg in db_consumer:
+            # print("iot data", msg)
+            handle_db_consumer_message(msg.value)
+    except KeyboardInterrupt:
+        print("DB Consumer stopped.")
+    finally:
+        db_consumer.close()
+
+# Consumer thread for inference messages
+def consume_inference_messages():
+    # Initialize the Kafka consumer
+    inference_consumer = KafkaConsumer(
+        inference_topic_name,
+        bootstrap_servers=bootstrap_servers,
+        auto_offset_reset='earliest',
+        enable_auto_commit=True,
+        group_id='inference-consumer-group',
+        value_deserializer=lambda m: json.loads(m.decode('utf-8'))  # Deserialize JSON messages
+    )
+
+    print("Inference Consumer is listening for messages...")
+    
+    try:
+        for msg in inference_consumer:
+            # print("inference data", msg)
+            handle_inference_consumer_message(msg.value)
+    except KeyboardInterrupt:
+        print("Inference Consumer stopped.")
+    finally:
+        inference_consumer.close()
+
+# Run the consumers concurrently using threading
+if __name__ == "__main__":
+    # Create threads for each consumer
+    db_thread = threading.Thread(target=consume_db_messages)
+    inference_thread = threading.Thread(target=consume_inference_messages)
+
+    # Start both threads
+    db_thread.start()
+    inference_thread.start()
+
+    # Wait for both threads to finish
+    db_thread.join()
+    inference_thread.join()
+
+    # Close MongoDB client
+    client.close()
