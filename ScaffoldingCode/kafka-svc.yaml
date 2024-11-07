@@ -1,0 +1,23 @@
+---
+# CS4287-5287
+# Author: Aniruddha Gokhale
+# Created: Fall 2024
+#
+# This is a declarative approach to describe a Kubernetes based
+# service and deployment for Apache Kafka
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-svc
+spec:
+  type: NodePort   # say we deploy it as cluster service only (this is default)
+  selector:
+    app: kafka-broker  # used to match the pod(s) that run the actual kafka broker
+  ports:
+    - name: kafka-port    # not needed, but I have added this
+      protocol: TCP     # this is default (so not needed either)
+      targetPort: 9092   # port used by the running container inside the pod
+      port: 30092   # the port advertised by the service to the cluster
+      nodePort: 30092   # for outside world (we use same)
+...
