@@ -1,0 +1,13 @@
+# Docker file to for ml-server container
+# The FROM clause tells docker what underlying base to use.
+FROM python:3.10
+
+# Install the application dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# run the server code as the final step of starting the container
+COPY models /root/.cache/torch/hub/checkpoints
+COPY cloud_computing_team9/ScaffoldingCode/inference-consumer.py ./
+CMD ["python3", "inference-consumer.py"]
+
