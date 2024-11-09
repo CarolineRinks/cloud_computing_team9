@@ -1,0 +1,53 @@
+---
+# CS4287-5287
+# Author: Aniruddha Gokhale
+# Created: Fall 2024
+#
+# This is a declarative approach to describe a Kubernetes based
+# service and deployment of Apache Kafka
+
+# This is a declarative approach to describe a Job type Kubernetes
+# workload.   Since this is YAML, the indentation is very important
+apiVersion: apps/v1
+kind: Deployment         # We are testing the Job resource type
+metadata:
+  name: kafka-deploy  # A name must be given to the deployment type in the metadata section
+spec:                     # This is the specification where we can even put the number of replicas
+  replicas: 1            # this is default
+  selector:
+    matchLabels:
+      app: kafka-broker     # Basically this is like the search string used to locate the pods
+  minReadySeconds: 5  # if anything crashes before 5 secs, the deployment is not
+                                    # considered as ready and available. Default value is 0
+  template:               # Specified info needed to run the pod and what runs in the pod
+    metadata:
+      labels:
+        app: kafka-broker  # this is used in our service yaml file to match with the pod
+    spec:                 # actual specification
+      # hostname: kafka-host
+      containers:
+        - name: kafka-pod       # this is going to be used for DNS name
+          # Change the IP address to where you are running this
+          image: 172.16.1.240:5000/bitnami/kafka   # this is the image in registry accessible from all our workers
+          ports:
+          - containerPort: 9092
+          env:   # all the environment variables
+          - name: KAFKA_CFG_NODE_ID
+            value: "1"
+          - name: KAFKA_CFG_PROCESS_ROLES
+            value: controller,broker
+          - name: KAFKA_CFG_LISTENERS
+            value: PLAINTEXT://:9092,CONTROLLER://:9093
+          # Set your k8s master IP in the following
+          - name: KAFKA_CFG_ADVERTISED_LISTENERS
+            value: PLAINTEXT://<master K8s IP addr>:30092
+          - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+            value: CONTROLLER
+          - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+            value: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+            value: 1@localhost:9093
+          - name: KAFKA_CFG_NUM_PARTITIONS
+            value: "1"
+          imagePullPolicy: Always  # This forces the node to pull the image
+...
