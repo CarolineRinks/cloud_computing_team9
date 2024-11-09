@@ -1,0 +1,17 @@
+# Docker file to for ml-server container
+# The FROM clause tells docker what underlying base to use.
+FROM python:3.10
+
+# Install the application dependencies
+# Set working directory
+# WORKDIR /home/cc/cloud_computing_team9/ScaffoldingCode
+
+# Copy the db-consumer.py file to the container
+COPY db-consumer.py .
+
+# Install dependencies (if you have a requirements.txt file)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Run the db-consumer.py script
+CMD ["python3", "db-consumer.py"]
