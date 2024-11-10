@@ -10,8 +10,8 @@ FROM python:3.10
 COPY db-consumer.py .
 
 # Install dependencies (if you have a requirements.txt file)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY db_consumer_requirements.txt .
+RUN pip install --no-cache-dir -r db_consumer_requirements.txt
 
 # Run the db-consumer.py script
 CMD ["python3", "db-consumer.py"]

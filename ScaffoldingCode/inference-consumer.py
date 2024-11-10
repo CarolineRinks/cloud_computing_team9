@@ -12,8 +12,12 @@ import base64
 from io import BytesIO
 from PIL import Image,ImageFilter
 from torchvision import transforms
+
+# point to model
+#torch.hub.set_dir('/root/.cache/torch/hub')
+
 # Kafka broker's IP and port
-bootstrap_servers = '192.168.5.224:9092'
+bootstrap_servers = 'kafka-svc.default.svc.cluster.local:9092'
 
 
 # set device to gpu if available, else cpu
@@ -54,7 +58,7 @@ consumer = KafkaConsumer(
 print("Consumer is listening for messages...")
 
 # This is to send the inference result to the db-consumer
-producer = KafkaProducer(bootstrap_servers="192.168.5.224:9092",
+producer = KafkaProducer(bootstrap_servers=bootstrap_servers,
                                           acks=1)  # wait for leader to write to log
 
 # Process messages as they arrive

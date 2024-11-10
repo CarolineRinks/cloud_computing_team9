@@ -28,7 +28,7 @@ spec:                     # This is the specification where we can even put the 
       containers:
         - name: kafka-pod       # this is going to be used for DNS name
           # Change the IP address to where you are running this
-          image: 172.16.1.240:5000/bitnami/kafka   # this is the image in registry accessible from all our workers
+          image: bitnami/kafka   # this is the image in registry accessible from all our workers
           ports:
           - containerPort: 9092
           env:   # all the environment variables
@@ -40,7 +40,7 @@ spec:                     # This is the specification where we can even put the 
             value: PLAINTEXT://:9092,CONTROLLER://:9093
           # Set your k8s master IP in the following
           - name: KAFKA_CFG_ADVERTISED_LISTENERS
-            value: PLAINTEXT://<master K8s IP addr>:30092
+            value: PLAINTEXT://172.16.4.133:30092
           - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
             value: CONTROLLER
           - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP

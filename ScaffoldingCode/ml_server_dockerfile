@@ -3,11 +3,10 @@
 FROM python:3.10
 
 # Install the application dependencies
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY ml_server_requirements.txt ./
+RUN pip install --no-cache-dir -r ml_server_requirements.txt
 
 # run the server code as the final step of starting the container
-COPY models /root/.cache/torch/hub/checkpoints
-COPY cloud_computing_team9/ScaffoldingCode/inference-consumer.py ./
+COPY inference-consumer.py ./
 CMD ["python3", "inference-consumer.py"]
 

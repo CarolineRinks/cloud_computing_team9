@@ -1,0 +1,6 @@
+kafka-python
+numpy
+Pillow
+tensorflow
+opencv-python
+                  

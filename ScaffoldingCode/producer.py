@@ -48,7 +48,8 @@ cifar10_labels = {
 
 
 # acquire the producer
-producer = KafkaProducer (bootstrap_servers="192.168.5.224:9092", 
+bootstrap_servers = 'kafka-svc.default.svc.cluster.local:9092'
+producer = KafkaProducer (bootstrap_servers=bootstrap_servers, 
                                           acks=1)  # wait for leader to write to log
 
 for i in range (100):
