@@ -11,14 +11,19 @@ from pymongo import MongoClient
 import os  # Import the os module
 
 # Replace with your Kafka broker's IP and port
-bootstrap_servers = 'kafka-svc.default.svc.cluster.local:9092'
+bootstrap_servers = 'kafka-svc:30092'
 
 # Replace with the topic names used in your producer and inference producer
 db_topic_name = 'cifar'
 inference_topic_name = 'inference'
 
-# Connect to MongoDB on localhost (default port 27017)
-client = MongoClient('mongodb://localhost:27017/')
+# Replace these with your actual credentials
+username = "root"
+password = "example"
+database_name = "cifarDatabase"
+
+# MongoDB connection string with authentication
+client = MongoClient(f'mongodb://{username}:{password}@mongodb:27017/{database_name}')
 
 # Access the database
 db = client['cifarDatabase']

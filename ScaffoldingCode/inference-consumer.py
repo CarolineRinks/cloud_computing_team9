@@ -17,7 +17,7 @@ from torchvision import transforms
 #torch.hub.set_dir('/root/.cache/torch/hub')
 
 # Kafka broker's IP and port
-bootstrap_servers = 'kafka-svc.default.svc.cluster.local:9092'
+bootstrap_servers = 'kafka-svc:30092'
 
 
 # set device to gpu if available, else cpu
@@ -61,6 +61,9 @@ print("Consumer is listening for messages...")
 producer = KafkaProducer(bootstrap_servers=bootstrap_servers,
                                           acks=1)  # wait for leader to write to log
 
+# This is to send the result to the producer for latency calculation
+producer_latency = KafkaProducer(bootstrap_servers=bootstrap_servers, acks=1)
+
 # Process messages as they arrive
 try:
     for msg in consumer:
@@ -71,6 +74,7 @@ try:
         unique_id = data.get('ID')
         ground_truth = data.get('GroundTruth')
         img_base64 = data.get('Data')
+        producer_id = data.get('ProducerID')
 
         # Print the basic information
         print(f"Received message with ID: {unique_id}, GroundTruth: {ground_truth}")
@@ -121,7 +125,13 @@ try:
         # SENDING DATA TO db-consumer
 
         # Prepare the JSON message
-        message = {
+        result_message = {
+            'ID': unique_id,
+            'InferredValue': cifar10_labels[top_id.item()],
+            'ProducerID': producer_id
+        }
+        json_result_message = json.dumps(result_message)
+        message = {             # message to send to db consumer
             'ID': unique_id,
             'InferredValue': cifar10_labels[top_id.item()],
         }
@@ -130,7 +140,11 @@ try:
         try:
             producer.send('inference', value=bytes (json_data, 'ascii'))  # Replace with your actual topic name
             producer.flush()
-            print(f"Sent image ID {unique_id}")
+            print(f"Sent image ID {unique_id} to db consumer")
+            producer_latency.send('results', value=bytes (json_result_message, 'ascii'))
+            producer_latency.flush()
+            print(f"Sent image ID {unique_id} back to producer {producer_id}")
+
         except Exception as e:
             print(f"Error sending message: {e}")
             print(e)
@@ -140,7 +154,7 @@ try:
 
     # we are done
     producer.close ()
-
+    producer_latency.close()
 
 except KeyboardInterrupt:
     print("Consumer stopped.")
