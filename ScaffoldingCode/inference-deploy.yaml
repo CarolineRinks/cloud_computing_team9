@@ -6,7 +6,7 @@ spec:                     # This is the specification where we can even put the 
   replicas: 1            # this is default
   selector:
     matchLabels:
-      app: inference-deploy     # Basically this is like the search string used to locate the pods
+      app: inference-consumer     # Basically this is like the search string used to locate the pods
   minReadySeconds: 5  # if anything crashes before 5 secs, the deployment is not
                                     # considered as ready and available. Default value is 0
   template:               # Specified info needed to run the pod and what runs in the pod
@@ -17,7 +17,7 @@ spec:                     # This is the specification where we can even put the 
       # hostname: kafka-host
       containers:
         - name: inference-pod       # this is going to be used for DNS name
-          image: 172.16.4.133:5000/team9/ml_server_image   # this is the image in registry on cluster 4 master
+          image: 172.16.3.82:5000/team9/ml_server_image   # this is the image in registry on cluster 4 master
           ports:
             - containerPort: 9092
           imagePullPolicy: Always  # This forces the node to pull the image
