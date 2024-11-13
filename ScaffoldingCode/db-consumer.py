@@ -11,14 +11,17 @@ from pymongo import MongoClient
 import os  # Import the os module
 
 # Replace with your Kafka broker's IP and port
-bootstrap_servers = 'kafka-svc.default.svc.cluster.local:9092'
+bootstrap_servers = 'kafka-svc:30092'
 
 # Replace with the topic names used in your producer and inference producer
 db_topic_name = 'cifar'
 inference_topic_name = 'inference'
+# Replace these with your actual credentials
+username = "root"
+password = "example"
+database_name = "cifarDatabase"
 
-# Connect to MongoDB on localhost (default port 27017)
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb://mongodb:27017/')
 
 # Access the database
 db = client['cifarDatabase']
@@ -39,6 +42,7 @@ def handle_db_consumer_message(data):
 
     # Extract the fields
     unique_id = data.get('ID')
+    producer_id=data.get('ProducerID')
     ground_truth = data.get('GroundTruth')
     img_base64 = data.get('Data')
 
@@ -46,24 +50,26 @@ def handle_db_consumer_message(data):
     img_bytes = base64.b64decode(img_base64)
     image = Image.open(BytesIO(img_bytes))
     # Save the image in the new folder
-    image_filename = os.path.join(image_folder, f"{unique_id}_{ground_truth}.png")
-    image.save(image_filename)
-    print(f"Image saved as {image_filename}")
+    # image_filename = os.path.join(image_folder, f"{unique_id}_{ground_truth}.png")
+    # image.save(image_filename)
+    # print(f"Image saved as {image_filename}")
 
 # Function to handle inference data and update the MongoDB document
 def handle_inference_consumer_message(data):
     # Extract the fields
     unique_id = data.get('ID')
+    producer_id=data.get('ProducerID')
     prediction = data.get('InferredValue')
 
     # Find the document with the matching ID and update it with the predicted label
     result = collection.update_one(
-        {'ID': unique_id},   # Filter by unique ID
+        {'ID': unique_id, 'ProducerID': producer_id},  # Filter by unique ID and producer ID
         {'$set': {'InferredValue': prediction}}  # Set the prediction
     )
+    
     print("prediction data", prediction)
     if result.modified_count > 0:
-        print(f"Updated document with ID: {unique_id} with prediction: {prediction}")
+        print(f"Updated document with unique ID: {unique_id} and producer ID: {producer_id} with prediction: {prediction}")
     else:
         print(f"No document found with ID: {unique_id} to update.")
 
@@ -83,7 +89,7 @@ def consume_db_messages():
     
     try:
         for msg in db_consumer:
-            # print("iot data", msg)
+            print("iot data", msg)
             handle_db_consumer_message(msg.value)
     except KeyboardInterrupt:
         print("DB Consumer stopped.")
@@ -106,7 +112,7 @@ def consume_inference_messages():
     
     try:
         for msg in inference_consumer:
-            # print("inference data", msg)
+            print("inference data", msg)
             handle_inference_consumer_message(msg.value)
     except KeyboardInterrupt:
         print("Inference Consumer stopped.")
@@ -115,6 +121,7 @@ def consume_inference_messages():
 
 # Run the consumers concurrently using threading
 if __name__ == "__main__":
+# Create a thread for the db consumer
     # Create threads for each consumer
     db_thread = threading.Thread(target=consume_db_messages)
     inference_thread = threading.Thread(target=consume_inference_messages)
