@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inference-deploy  # A name must be given to the deployment type in the metadata section
+spec:                     # This is the specification where we can even put the number of replicas
+  replicas: 1            # this is default
+  selector:
+    matchLabels:
+      app: inference-consumer     # Basically this is like the search string used to locate the pods
+  minReadySeconds: 5  # if anything crashes before 5 secs, the deployment is not
+                                    # considered as ready and available. Default value is 0
+  template:               # Specified info needed to run the pod and what runs in the pod
+    metadata:
+      labels:
+        app: inference-consumer  # this is used in our service yaml file to match with the pod
+    spec:                 # actual specification
+      # hostname: kafka-host
+      containers:
+        - name: inference-pod       # this is going to be used for DNS name
+          image: 172.16.3.82:5000/team9/ml_server_image   # this is the image in registry on cluster 4 master
+          ports:
+            - containerPort: 9092
+          imagePullPolicy: Always  # This forces the node to pull the image
+          env:
+            - name: BOOTSTRAP_SERVERS
+              value: "kafka-svc:30092"
+            - name: TOPIC_NAME
+              value: "cifar"
+            - name: KAFKA_GROUP_ID
+              value: "simple-consumer-group"
+...

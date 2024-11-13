@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: producer-job
+spec:
+  completions: 1  # Ensure only one pod is created
+  parallelism: 1  # Ensure only one pod runs at a time
+  template:
+    spec:
+      containers:
+      - name: producer
+        image: 172.16.3.82:5000/team9/producer_image:latest
+        env:
+        - name: PRODUCER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name  # This assigns a unique producer ID based on the pod name
+        volumeMounts:
+        - name: output-volume
+          mountPath: /output
+      restartPolicy: Never
+      volumes:
+      - name: output-volume
+        persistentVolumeClaim:
+          claimName: output-pvc  # Use a PVC for persistent storage
+  backoffLimit: 4  # Number of retries before marking the job as failed

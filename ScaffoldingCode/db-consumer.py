@@ -12,6 +12,7 @@ import os  # Import the os module
 
 # Replace with your Kafka broker's IP and port
 bootstrap_servers = 'kafka-svc:30092'
+bootstrap_servers = 'kafka-svc:30092'
 
 # Replace with the topic names used in your producer and inference producer
 db_topic_name = 'cifar'
