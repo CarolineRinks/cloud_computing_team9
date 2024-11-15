@@ -1,0 +1,12 @@
+# Docker file to for ml-server container
+# The FROM clause tells docker what underlying base to use.
+FROM python:3.10
+
+# Install the application dependencies
+COPY ml_server_requirements.txt .
+RUN pip install --no-cache-dir -r ml_server_requirements.txt
+
+# run the server code as the final step of starting the container
+COPY inference-consumer-final.py .
+CMD ["python3", "inference-consumer-final.py"]
+
