@@ -2,7 +2,9 @@
 
 ## IoT Source Producer:
 Code: producer.py and producer_consumer.py
+
 Dockerfiles: producer_dockerfile and producer_consumer_dockerfile
+
 YAML files: producer_job.yaml and producer_consumer_job.yaml
 
 ## Kafka Broker: 
@@ -13,12 +15,16 @@ YAML files: mongo_service and mongo_deployment
 
 ## ML Inference Server
 Code: inference-consumer-final.py
+
 Dockerfile: simple_dockerfile
+
 YAML files: consumer_job.yaml
 
 ## DB Consumer
 Code: db-consumer-original.py
+
 Dockerfile: db_consumer_dockerfile
+
 YAML files: db_consumer_job.yaml
 
 
