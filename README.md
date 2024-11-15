@@ -4,4 +4,4 @@ Contains Team 9's code for programming assignments in the Principles of Cloud Co
 
 AnsibleAutomation contains ansible playbooks.
 
-ScaffoldingCode contains python code, dockerfiles, yaml files, and results.
+ScaffoldingCode contains python code, dockerfiles, yaml files, and results. See README in ScaffoldingCode for deployment setup.
