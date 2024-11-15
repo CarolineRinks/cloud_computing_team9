@@ -1,0 +1,231 @@
+    "result": {
+        "changed": false,
+        "msg": "All items completed",
+        "results": [
+            {
+                "ansible_facts": {
+                    "discovered_interpreter_python": "/usr/bin/python3"
+                },
+                "ansible_index_var": "idx",
+                "ansible_loop_var": "item",
+                "changed": false,
+                "failed": false,
+                "idx": 0,
+                "invocation": {
+                    "module_args": {
+                        "all_projects": false,
+                        "api_timeout": null,
+                        "auth": null,
+                        "auth_type": null,
+                        "ca_cert": null,
+                        "client_cert": null,
+                        "client_key": null,
+                        "detailed": false,
+                        "filters": null,
+                        "interface": "public",
+                        "name": "Cloud-C1M1",
+                        "region_name": null,
+                        "sdk_log_level": "INFO",
+                        "sdk_log_path": null,
+                        "timeout": 180,
+                        "validate_certs": null,
+                        "wait": true
+                    }
+                },
+                "item": [
+                    0,
+                    0
+                ],
+                "servers": [
+                    {
+                        "access_ipv4": "",
+                        "access_ipv6": "",
+                        "addresses": {
+                            "CH-822922-net": [
+                                {
+                                    "OS-EXT-IPS-MAC:mac_addr": "fa:16:3e:3f:a7:ea",
+                                    "OS-EXT-IPS:type": "fixed",
+                                    "addr": "192.168.5.94",
+                                    "version": 4
+                                }
+                            ]
+                        },
+                        "admin_password": null,
+                        "attached_volumes": [],
+                        "availability_zone": "nova",
+                        "block_device_mapping": null,
+                        "compute_host": "c08-38",
+                        "config_drive": "",
+                        "created_at": "2024-06-12T18:31:35Z",
+                        "description": "Cluster Master",
+                        "disk_config": "MANUAL",
+                        "fault": null,
+                        "flavor": {
+                            "description": null,
+                            "disk": 40,
+                            "ephemeral": 0,
+                            "extra_specs": {},
+                            "id": "m1.large",
+                            "is_disabled": null,
+                            "is_public": true,
+                            "location": null,
+                            "name": "m1.large",
+                            "original_name": "m1.large",
+                            "ram": 8192,
+                            "rxtx_factor": null,
+                            "swap": 0,
+                            "vcpus": 4
+                        },
+                        "flavor_id": null,
+                        "has_config_drive": "",
+                        "host_id": "95d3e0af4d02413426cce4c0fe509f29b1d83a94ae9352dc98d334c0",
+                        "host_status": null,
+                        "hostname": "cloud-c1m1",
+                        "hypervisor_hostname": "c08-38",
+                        "id": "e9e86e4b-9a46-47ed-9f25-de320c1459f8",
+                        "image": {
+                            "architecture": null,
+                            "checksum": null,
+                            "container_format": null,
+                            "created_at": null,
+                            "direct_url": null,
+                            "disk_format": null,
+                            "file": null,
+                            "has_auto_disk_config": null,
+                            "hash_algo": null,
+                            "hash_value": null,
+                            "hw_cpu_cores": null,
+                            "hw_cpu_policy": null,
+                            "hw_cpu_sockets": null,
+                            "hw_cpu_thread_policy": null,
+                            "hw_cpu_threads": null,
+                            "hw_disk_bus": null,
+                            "hw_machine_type": null,
+                            "hw_qemu_guest_agent": null,
+                            "hw_rng_model": null,
+                            "hw_scsi_model": null,
+                            "hw_serial_port_count": null,
+                            "hw_video_model": null,
+                            "hw_video_ram": null,
+                            "hw_vif_model": null,
+                            "hw_watchdog_action": null,
+                            "hypervisor_type": null,
+                            "id": "cdbbbe8f-f5a5-499c-b4b3-9b7dbecbdfd5",
+                            "instance_type_rxtx_factor": null,
+                            "instance_uuid": null,
+                            "is_hidden": null,
+                            "is_hw_boot_menu_enabled": null,
+                            "is_hw_vif_multiqueue_enabled": null,
+                            "is_protected": null,
+                            "kernel_id": null,
+                            "location": null,
+                            "locations": null,
+                            "metadata": null,
+                            "min_disk": null,
+                            "min_ram": null,
+                            "name": null,
+                            "needs_config_drive": null,
+                            "needs_secure_boot": null,
+                            "os_admin_user": null,
+                            "os_command_line": null,
+                            "os_distro": null,
+                            "os_require_quiesce": null,
+                            "os_shutdown_timeout": null,
+                            "os_type": null,
+                            "os_version": null,
+                            "owner": null,
+                            "owner_id": null,
+                            "properties": {
+                                "links": [
+                                    {
+                                        "href": "https://kvm.tacc.chameleoncloud.org:8774/images/cdbbbe8f-f5a5-499c-b4b3-9b7dbecbdfd5",
+                                        "rel": "bookmark"
+                                    }
+                                ]
+                            },
+                            "ramdisk_id": null,
+                            "schema": null,
+                            "size": null,
+                            "status": null,
+                            "store": null,
+                            "tags": [],
+                            "updated_at": null,
+                            "url": null,
+                            "virtual_size": null,
+                            "visibility": null,
+                            "vm_mode": null,
+                            "vmware_adaptertype": null,
+                            "vmware_ostype": null
+                        },
+                        "image_id": null,
+                        "instance_name": "instance-0001f6d1",
+                        "is_locked": false,
+                        "kernel_id": "",
+                        "key_name": "F24_CS4287",
+                        "launch_index": 0,
+                        "launched_at": "2024-06-12T18:31:50.000000",
+                        "links": [
+                            {
+                                "href": "https://kvm.tacc.chameleoncloud.org:8774/v2.1/servers/e9e86e4b-9a46-47ed-9f25-de320c1459f8",
+                                "rel": "self"
+                            },
+                            {
+                                "href": "https://kvm.tacc.chameleoncloud.org:8774/servers/e9e86e4b-9a46-47ed-9f25-de320c1459f8",
+                                "rel": "bookmark"
+                            }
+                        ],
+                        "locked_reason": null,
+                        "max_count": null,
+                        "metadata": {},
+                        "min_count": null,
+                        "name": "Cloud-C1M1",
+                        "networks": null,
+                        "pinned_availability_zone": null,
+                        "power_state": 1,
+                        "progress": 0,
+                        "project_id": "9c3848cc69044cdfb5a8c7b5e273b276",
+                        "ramdisk_id": "",
+                        "reservation_id": "r-opnpeidz",
+                        "root_device_name": "/dev/vda",
+                        "scheduler_hints": null,
+                        "security_groups": [
+                            {
+                                "name": "ENABLE_HTTP_HTTPS"
+                            },
+                            {
+                                "name": "ENABLE_PRIV_REGISTRY"
+                            },
+                            {
+                                "name": "ENABLE_ZMQ_APPS"
+                            },
+                            {
+                                "name": "ENABLE_SSH"
+                            },
+                            {
+                                "name": "ENABLE_K8S"
+                            },
+                            {
+                                "name": "default"
+                            },
+                            {
+                                "name": "ENABLE_ICMP"
+                            }
+                        ],
+                        "server_groups": null,
+                        "status": "ACTIVE",
+                        "tags": [],
+                        "task_state": null,
+                        "terminated_at": null,
+                        "trusted_image_certificates": null,
+                        "updated_at": "2024-06-12T18:31:50Z",
+                        "user_data": null,
+                        "user_id": "d560c33d090b5b7aa8855170dfc3627c003e69daaf8b330a63bd5762357bd43f",
+                        "vm_state": "active",
+                        "volumes": []
+                    }
+                ]
+            }
+        ],
+        "skipped": false
+    }
+

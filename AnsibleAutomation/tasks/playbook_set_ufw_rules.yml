@@ -1,0 +1,171 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+# Modified: Spring 2021
+# Modified: Summer 2022
+# Modified: Fall 2022
+# Modified: Fall 2023  Removed Swarm related ports and added OVS
+#
+# This playbook will set ufw rules
+
+  # Note that the following will even get rid of Port 22, which I found the hard way and
+  # can no longer connect to any VMs unless I go to the console from the web and manually add
+  # all these rules. Best is to not venture into this area at all.
+  #
+  # I think it is best to delete the rules and add them again instead of this dangerous reset 
+  #- name: "First reset ufw to installation defaults"
+  #  community.general.ufw:
+  #   state: "reset"
+  #  when: "cloud['platform']|string in 'chameleon'"
+
+
+  # K8s port usage is explained here: https://kubernetes.io/docs/reference/networking/ports-and-protocols/
+      
+  - name: "UFW for kube-apiserver, etcd"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 2379:2381   # when I saw inside the files, I saw 2381 also
+      comment: "etcd client server communication"
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "UFW for k8s APIserver"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 6443
+      comment: "K8s API Server"
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "UFW for kubelet API, Scheduler and Controller"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 10250
+      comment: "Kubelet API"
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "UFW for K8s controller manager"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 10257
+      comment: "K8s controller manager"
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "UFW for kube Scheduler"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 10259
+      comment: "K8s Scheduler"
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "UFW for K8s RBAC"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 8080
+      comment: "K8s local web"
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "UFW for Flannel VXLAN"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: udp
+      port: 8285
+      comment: Flannel VXLAN
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "UFW for Flannel"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: udp
+      port: 8472
+      comment: Flannel
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "UFW for OVS VXLAN"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: udp
+      port: 4789
+      comment: OVS VXLAN
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "OVS to OpenFlow"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 6633:6653
+      comment: OVS OpenFlow Communications
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "OVS DB"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 6632:6640
+      comment: OVS DB
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "UFW for private docker registry"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 5000
+      comment: Docker private registry
+    when: "cloud['platform']|string in 'chameleon'"
+     
+  - name: "UFW for NodePort services"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 30000:30200  # for user services
+      comment: "services offered as nodePort"
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "UFW for http"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 80   
+      comment: "http"
+    when: "cloud['platform']|string in 'chameleon'"
+ 
+  - name: "UFW for nginx ingress"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 8081   
+      comment: "nginx ingress"
+    when: "cloud['platform']|string in 'chameleon'"
+ 
+  - name: "UFW for prometheus"
+    community.general.ufw:
+      rule: limit
+      state: enabled
+      proto: tcp
+      port: 9113   
+      comment: "Prometheus"
+    when: "cloud['platform']|string in 'chameleon'"
+ 
+...

@@ -1,0 +1,14 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2023
+#
+# In this playbook we update cache and upgrade packages
+#
+  - name: "Update cache and upgrade"
+    ansible.builtin.apt:
+      update_cache: yes    # basically do a apt-get update
+      upgrade: yes
+...

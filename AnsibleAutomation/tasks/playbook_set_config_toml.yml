@@ -1,0 +1,34 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Aniruddha Gokhale
+# Created: Summer 2022
+#
+
+  # since the operations are all to be performed by
+  # root, we assume this will be invoked with become: yes
+  - name: "First, delete any existing config.toml file"
+    ansible.builtin.file:
+      path: /etc/containerd/config.toml
+      state: absent
+    when: ansible_host not in groups['K8s_Masters']
+      
+  - name: "Next, create a default config.toml file"
+    ansible.builtin.shell:
+      cmd: containerd config default > /etc/containerd/config.toml
+    when: ansible_host not in groups['K8s_Masters']
+
+  - name: "Insert information about the private registry"
+    ansible.builtin.lineinfile:
+      path: /etc/containerd/config.toml
+      firstmatch: yes
+      search_string: '[plugins."io.containerd.grpc.v1.cri".registry.mirrors]'
+      # unfortunately, I am unable to get the indentation, and blockinfile and
+      # replace modules somehow did not work.
+      line: |
+              [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+                [plugins."io.containerd.grpc.v1.cri".registry.mirrors."192.168.5.102:5000"]
+                  endpoint = ["http://192.168.5.102:5000"]
+    when: ansible_host not in groups['K8s_Masters']
+
+...

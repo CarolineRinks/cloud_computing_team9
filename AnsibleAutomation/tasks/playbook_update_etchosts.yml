@@ -1,0 +1,32 @@
+---
+#
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2023  
+#
+# This playbook updates the /etc/hosts file by adding the private IP address and hostname
+# of the VM. We are not sure if this is a cause for K8s cluster not getting set correctly.
+
+  # We could have found this via ansible_facts but this needs the expensive gather_facts. Hence
+  # this trick
+  - name: "Obtain our host name"
+    ansible.builtin.shell:
+      cmd: hostname
+    register: hname
+    
+  - name: "Obtain our IP addr"
+    ansible.builtin.shell:
+      cmd: hostname -I
+    register: haddr
+    
+  - name: "Check if we are doing things correctly"
+    ansible.builtin.debug:
+      msg: "Host = {{ ansible_host }}, IP = {{ haddr.stdout.split ()[0] }}, Hostname = {{ hname.stdout }}"
+
+  - name: "Add a line in /etc/hosts file "
+    ansible.builtin.lineinfile:
+      path: /etc/hosts
+      insertafter: EOF
+      line: "{{ haddr.stdout.split ()[0] }} {{ hname.stdout }}"
+      
+...

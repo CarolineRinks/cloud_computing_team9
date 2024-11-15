@@ -1,0 +1,14 @@
+---
+#
+# CS/ECE 4383/5383: Computer Networking
+# CS 4287/5287: Principles of Cloud Computing
+# CS 6381: Distributed Systems Principles
+# Author: Aniruddha Gokhale
+# Created: Fall 2024
+#
+  # Download the Helm latest release
+  - name: "Download Helm distribution"
+    ansible.builtin.get_url:
+      url: https://get.helm.sh/helm-v{{ helm['version'] }}-linux-arm.tar.gz
+      dest: /home/{{ local_user }}/Downloads/
+

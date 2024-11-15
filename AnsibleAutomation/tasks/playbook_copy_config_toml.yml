@@ -1,0 +1,28 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networking
+# Author: Aniruddha Gokhale
+# Created: Spring 2023
+# Modified: Fall 2023
+# Modified: Spring 2024 (parametrized name of toml file)
+#
+# Here we update the config.toml file
+
+  # since the operations are all to be performed by root,
+  # we assume this will be invoked with become: yes
+
+  # Instead of doing this, I created this on the VM, copied it to
+  # local dir, modified it and now will copy it
+  # Create a default config.toml file
+  #- name: "Create a new default config.toml"
+  #  ansible.builtin.shell:
+  #    cmd: /usr/bin/containerd config default > /etc/containerd/config.toml
+      
+  # now copy the config.toml that we have into the appropriate dir
+  - name: "Next, upload a new config.toml file"
+    ansible.builtin.copy:
+      src: "{{ K8s['ctr_cfg'] }}"
+      dest: /etc/containerd/config.toml
+
+...

@@ -1,0 +1,235 @@
+
+# - name: "Play: Create VMs on Chameleon"
+#   hosts: LocalMC  # This corresponds to the alias in your inventory
+#   remote_user: "{{ local_user }}"
+#   gather_facts: no
+#   become: false
+
+#   vars_files:
+#     - Users/sanjanadas/ansible_gen/AnsibleAutomation/test_vars.yml  # Adjust the path according to your directory structure
+
+#   vars:
+#     ansible_python_interpreter: /Users/sanjanadas/ansible_gen/AnsibleAutomation/myvenv/bin/python3.11
+#   tasks:
+#     - import_tasks: tasks/playbook_create_vm.yaml
+
+# - name: "Play 16a - Install kafka locally"
+#   hosts: CloudVMs          # specified in the MyInventory file
+#   remote_user:  ansible_user     # note that the user is cc on Chameleon
+#   gather_facts: no
+#   become: false  # no need here.
+#   collections:
+#   - ansible-base
+
+#   vars_files:
+#     - Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml  # Adjust the path according to your directory structure
+
+#   vars:
+#     ansible_python_interpreter: /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/myvenv/bin/python3.11
+
+#   tasks:    # the task to be performed
+#   - import_tasks: tasks/playbook_install_kafka.yml
+
+
+
+# - name: "Play 4 - Install apt packages on Cloud VMs"
+#   hosts: CloudVMs          # specified in the MyInventory file
+#   remote_user:  "{{ ansible_user }}"      # note that the user is cc on Chameleon
+#   become: true  # we set it here instead of doing per task
+#   gather_facts: no
+#   collections:
+#   - ansible-base
+
+#   tasks: 
+#   - import_tasks: tasks/playbook_install_apt_packages.yml
+
+# - name: "Play 4 - Install various packages on Cloud VMs"
+#   hosts: CloudVMs          # specified in the MyInventory file
+#   remote_user: ansible_user  # note that the user is cc on Chameleon
+#   become: true  # we set it here instead of doing per task
+#   gather_facts: no
+#   collections:
+#   - ansible-base
+
+#   vars_files:
+#     - Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml  # Adjust the path according to your directory structure
+
+#   tasks:    # the task to be performed
+
+#   - import_tasks: tasks/playbook_install_pip_packages.yml
+#     #when: " ansible_host in hostvars['COMPNW_IPADDRS']['ipaddrs'] "
+
+
+# - name: "Play 16a - Install Kafka locally"
+#   hosts: CloudVMs
+#   remote_user: ansible_user
+#   gather_facts: no
+#   become: false
+
+#   vars_files:
+#     - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml
+
+#   vars:
+#     ansible_python_interpreter: /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/myvenv/bin/python3.11
+
+#   tasks:  # Ensure 'tasks' section is used
+#     - name: Debug Kafka variable
+#       ansible.builtin.debug:
+#         var: kafka
+
+
+#     - import_tasks: tasks/playbook_install_kafka.yml
+
+# - name: "Play 5 - Install Docker on Cloud VMs"
+#   hosts: CloudVMs          # specified in the MyInventory file
+#   remote_user:  ansible_user      # note that the user is cc on Chameleon
+#   gather_facts: yes   # we will need to get variety of facts like arch, OS release
+#   become: true  # we set it here instead of doing per task
+#   collections:
+#   - ansible-base
+
+#   vars_files:
+#     - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml  # Adjust the path according to your directory structure
+
+#   tasks:    # the task to be performed
+#   - import_tasks: tasks/playbook_install_docker.yml
+
+# - name: "Play 6 - Install Kubernetes on Cloud VMs"
+#   hosts: CloudVMs          # specified in the MyInventory file
+#   remote_user:  ansible_user      # note that the user is cc on Chameleon
+#   gather_facts: no
+#   become: true  # we set it here instead of doing per task
+#   collections:
+#   - ansible-base
+
+  # vars_files:
+  #   - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml
+
+#   tasks:    # the task to be performed
+#   - name: Debug K8s variable
+#     ansible.builtin.debug:
+#       var: k8s
+#   - import_tasks: tasks/playbook_install_kubernetes.yml
+
+- name: "Play 9A - Add Insecure Private Docker Registry info in local daemon.json file"
+  hosts: CloudVMs          # specified in the MyInventory file
+  remote_user:  "{{ ansible_user }}"      # note that the user is cc on Chameleon
+  gather_facts: no
+  become: no  # we set it here instead of doing per task
+  collections:
+  - ansible-base
+  vars_files:
+    - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml
+
+  tasks:    # the task to be performed
+  - import_tasks: tasks/playbook_docker_create_daemon_json_wpriv_registry.yml
+
+- name: "Play 9B - Update daemon.json file on all cluster nodes"
+  hosts: CloudVMs  
+  remote_user:  ansible_user      # note that the user is cc on Chameleon
+  become: true  # as we manipulate /etc/docker directory
+  gather_facts: no
+  collections:
+  - ansible-base
+
+  vars_files:
+    - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml
+   
+  tasks:    # the task to be performed
+  - import_tasks: tasks/playbook_docker_copy_daemon_json.yml
+
+- name: "Play 9C - Restart Docker on all cluster nodes"
+  hosts: CloudVMs  
+  remote_user:  ansible_user      # note that the user is cc on Chameleon
+  become: true  # as we manipulate /etc/docker directory
+  gather_facts: no
+  collections:
+  - ansible-base
+
+  vars_files:
+    - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml
+   
+  tasks:    # the task to be performed
+  - import_tasks: tasks/playbook_restart_docker.yml
+
+# - name: "Play 9D - Start private registry on master nodes"
+#   hosts: 192.168.5.102  
+#   remote_user:  ansible_user     # note that the user is cc on Chameleon
+#   gather_facts: no  # we don't need this either.
+#   collections:
+#   - ansible-base
+#   - community.docker
+#   vars_files:
+#     - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml
+
+#   tasks:    # the task to be performed
+#   - import_tasks: tasks/playbook_docker_start_priv_registry.yml
+
+# - name: "Play 10A - Create a new local config.toml file with updated settings"
+#   hosts: CloudVMs          # specified in the MyInventory file
+#   remote_user:  ansible_user     # note that the user is cc on Chameleon
+#   gather_facts: no
+#   become: true  # we set it here instead of doing per task
+#   collections:
+#   - ansible-base
+#   vars_files:
+#     - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml
+
+#   tasks:    # the task to be performed
+#   - import_tasks: tasks/playbook_set_config_toml.yml
+
+# - name: "Play 10D - Restart containerd"
+#   hosts: CloudVMs          # specified in the MyInventory file
+# #  hosts: "{{ K8s['masters_inv'] }}"          # specified in the MyInventory file
+#   remote_user:  ansible_user     # note that the user is cc on Chameleon
+#   gather_facts: no
+#   become: true  # we set it here instead of doing per task
+#   collections:
+#   - ansible-base
+
+#   tasks:    # the task to be performed
+#   - import_tasks: tasks/playbook_restart_containerd.yml
+#     #when: " ansible_host in hostvars['COMPNW_IPADDRS']['ipaddrs'] "
+
+# - name: "Play 10E - Restart docker"
+#   hosts: CloudVMs          # specified in the MyInventory file
+# #  hosts: "{{ K8s['masters_inv'] }}"          # specified in the MyInventory file
+#   remote_user:  ansible_user     # note that the user is cc on Chameleon
+#   gather_facts: no
+#   become: true  # we set it here instead of doing per task
+#   collections:
+#   - ansible-base
+
+#   tasks:    # the task to be performed
+#   - import_tasks: tasks/playbook_restart_docker.yml
+
+# - name: "Play 11 - Turn swap off on cloud vms"
+#   hosts: CloudVMs          # specified in the MyInventory file
+#   remote_user:  ansible_user      # note that the user is cc on Chameleon
+#   gather_facts: no
+#   become: true  # we set it here instead of doing per task
+#   collections:
+#   - ansible-base
+
+#   vars_files:
+#     - /Users/sanjanadas/cloud_computing_team9/AnsibleAutomation/test_vars.yml  # Adjust the path according to your directory structure
+
+#   tasks:    # the task to be performed
+#   - import_tasks: tasks/playbook_cloud_vm_swapoff.yml
+
+# - name: "Play 12 - Update /etc/hosts in K8s masters"
+#   hosts: K8s_Masters          # specified in the MyInventory file
+#   remote_user:  ansible_user      # note that the user is cc on Chameleon
+#   gather_facts: no
+#   become: true  # we set it here instead of doing per task
+#   collections:
+#   - ansible-base
+
+#   tasks:    # the task to be performed
+#   - import_tasks: tasks/playbook_update_etchosts.yml
+# #    when: " ansible_host in hostvars['COMPNW_IPADDRS']['ipaddrs'] "
+
+
+
+...
+

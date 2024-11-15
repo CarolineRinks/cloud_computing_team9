@@ -1,0 +1,94 @@
+---
+#
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2023 based on similar playbooks created before.
+#
+# This playbook will create VMs as specified on the desired cloud platform
+# See https://docs.ansible.com/ansible/latest/collections/openstack/cloud/server_module.html
+#
+# Despite the numerous amount of commonality, to save time, I am repeating the steps
+# for the Bastion, K8s masters, and K8s workers
+
+  - name: "Create Bastion VM on the Cloud"
+    openstack.cloud.server:
+      cloud: "{{ cloud['name'] }}"   # which cloud
+      state: present   # i.e., create
+      availability_zone: "{{ cloud['zone'] }}"  # which availability zone
+      # a complex naming scheme using loop index variable
+      name: "{{ cloud['name_prefix'] + \"Bastion\" }}"
+      boot_from_volume: false
+      image: "{{ cloud['image'] }}"  # indicates the image used to boot
+      flavor: "{{ cloud['master_flavor'] }}" # what flavor
+      key_name: "{{ cloud['key'] }}" # what key to use
+      security_groups:  "{{ cloud['security_groups'] }}"  # which security groups
+      network: "{{ cloud['network'] }}"  # network name
+      # nics: "net-id: {{ cloud['netid'] }}"  # which network interface (supply either network or nics)
+      #auto_ip: false   # we force an IP address (cannot be used when using floating_ips)
+      floating_ips: "{{ cloud['bastion_fip'] }}"    # what floating IP
+      reuse_ips: false
+      wait: yes  # this is the default
+      description: "Bastion VM"
+      #timeout: 300 # wait 5 mins for the instance to get into active state
+
+  - name: "Create K8s Master VMs on the Cloud"
+    openstack.cloud.server:
+      cloud: "{{ cloud['name'] }}"   # which cloud
+      state: present   # i.e., create
+      availability_zone: "{{ cloud['zone'] }}"  # which availability zone
+      # a complex naming scheme using loop index variable
+      name: "{{ cloud['name_prefix'] + \"C\"  + (idx + 1)|string + \"M\"}}"
+      boot_from_volume: false
+      image: "{{ cloud['image'] }}"  # indicates the image used to boot
+      flavor: "{{ cloud['master_flavor'] }}" # what flavor
+      key_name: "{{ cloud['key'] }}" # what key to use
+      security_groups:  "{{ cloud['security_groups'] }}"  # which security groups
+      network: "{{ cloud['network'] }}"  # network name
+      # nics: "net-id: {{ cloud['netid'] }}"  # which network interface (supply either network or nics)
+      #auto_ip: false   # we force an IP address (cannot be used when using floating_ips)
+      floating_ips: "{{ cloud['masters_fip'][idx] }}"    # what floating IP
+      reuse_ips: false 
+      description: "Cluster Master"
+      wait: yes  # this is the default
+      #timeout: 300 # wait 5 mins for the instance to get into active state
+    loop: "{{ range (K8s['clusters']) }}"
+    loop_control:
+      index_var: idx
+#  Add condition like this if any vm is not getting spawned.
+#    when: "{{ idx == 4 }}"
+#    when: "{{ item['name']|string == \"gokhale_vm2\" }}"
+
+  - name: "Create K8s Worker VMs on the Cloud"
+    openstack.cloud.server:
+      cloud: "{{ cloud['name'] }}"   # which cloud
+      state: present   # i.e., create
+      availability_zone: "{{ cloud['zone'] }}"  # which availability zone
+      # a complex naming scheme using loop index variable
+      name: "{{ cloud['name_prefix'] + \"C\" + (idx // K8s['workers'] + 1)|string + \"W\" + (idx % K8s['workers'] + 1)|string }}"
+      boot_from_volume: no
+      image: "{{ cloud['image'] }}"  # indicates the image used to boot
+      flavor: "{{ cloud['worker_flavor'] }}" # what flavor
+      key_name: "{{ cloud['key'] }}" # what key to use
+      security_groups:  "{{ cloud['security_groups'] }}"  # which security groups
+      network: "{{ cloud['network'] }}"  # network name
+      # nics: "net-id: {{ cloud['netid'] }}"  # which network interface (supply either network or nics)
+      auto_ip: false   # No floating IP for workers
+      reuse_ips: false 
+      description: "Cluster Worker"
+      wait: yes  # this is the default
+      #timeout: 300 # wait 5 mins for the instance to get into active state
+    loop: "{{ range (K8s['clusters'] * K8s['workers'] ) }}"
+    loop_control:
+      index_var: idx
+#  Add condition like this if any vm is not getting spawned.
+#    when: "{{ idx == 4 }}"
+#    when: "{{ item['name']|string == \"gokhale_vm2\" }}"
+
+###############################################################
+#  The connection waiting is usually right after the action
+###############################################################
+  - name : "Wait for Connection to VM"
+    ansible.builtin.wait_for_connection:
+...
+
+

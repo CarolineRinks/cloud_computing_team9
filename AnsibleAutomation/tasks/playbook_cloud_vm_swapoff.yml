@@ -1,0 +1,12 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+#
+# In this playbook we install packages via apt
+#
+  - name: "Turn swap off"
+    shell: swapoff -a
+...

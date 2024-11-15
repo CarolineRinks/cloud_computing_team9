@@ -1,0 +1,157 @@
+---
+#
+# Author: Aniruddha Gokhale
+# CS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# CS 6381: Distributed 
+# Created: Fall 2020
+# Modified: Spring 2021
+# Modified: Summer 2022
+# Modified: Fall 2023
+# Modified: Spring 2024
+# Modified: Summer 2024 - docker.gpg is now renamed to docker.asc
+#
+# In this playbook we install the docker engine
+# These steps follow the process explained at this URL:
+# https://docs.docker.com/engine/install/ubuntu/
+#
+# Lot of changes have also happened to the overall install process
+# See: https://wiki.debian.org/DebianRepository/UseThirdParty
+
+# remove any older version of Docker components
+  - name: "Remove any older version of Docker components"
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: absent
+    loop:
+      - docker.io
+      - docker-compose
+      - docker-compose-v2
+      - docker-doc
+      - podman-docker
+      - containerd
+      - runc
+      # I added these as these are the ones that now get installed (Fall 2023).
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+
+# Remove any older version of the apt repository
+# has changed in the latest installation instructions 
+  - name: "Remove any older Docker package repository"
+    ansible.builtin.apt_repository:
+      repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+      filename: docker   # gets stored under /etc/apt/sources.list.d/
+      state: absent
+      update_cache: yes  # this is default where the repo is updated
+
+# install pre requisite packages for docker
+# Over the years, this list has gotten trimmed and maybe because some of these
+# packages are nowadays default. But I have kept them as is.
+  - name: "Install a variety of pre-reqs for Docker"
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: latest
+      update_cache: yes    # basically do a apt-get update
+    loop:
+      # these exist in latest documentation
+      - ca-certificates  
+      - curl
+      # these are from earlier versions
+      - gnupg
+      - lsb-release
+
+# Create the keyrings dir /etc/apt/keyrings. In newer Ubuntu releases
+# this directory is supposed to exist by default.
+#
+# This part is also newer compared to previous years
+# This does the step "sudo install -m 0755 -d /etc/apt/keyrings"
+  - name: "Create keyrings dir, if not present"
+    ansible.builtin.file:
+      path: /etc/apt/keyrings
+      state: directory  # creates dir if not present else sort of no-op
+      mode: '0755'
+      
+# Add GPG key.
+# Essentially we are trying to achieve this (per latest documentation)
+# sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+#
+# Ansible doc says that apt_key is deprecated and is currently there
+# for backward compatibility.  The uri module provides curl capability
+#
+#
+# But first delete any older version, if we have one.
+  - name: "Remove older version of Docker GPG apt key, if any"
+    ansible.builtin.file:
+      path: /etc/apt/keyrings/docker.asc  # This is the new location and extension
+      state: absent
+
+# Per the latest documentation, Docker is using the "armored" extension instead of the
+# "binary" extension. Hence, the gpg key now has the .asc extension instead of .gpg
+# We use the get_url module as apt_key is deprecated.
+# We could have used the uri module too but since we simply need downloading,
+# the get_url is alright.
+  - name: "Add Docker GPG apt key"
+    ansible.builtin.get_url:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      dest: /etc/apt/keyrings/docker.asc  # This is the new location and new file extension
+      mode: "a+r"   # read permissions for all
+
+# We now use playbook approach to identify OS version and machine arch instead
+# of passing it as param from our vars file. This hopefully makes it more generic
+# However, there is some nonsense where the "dpkg --print-architecture" returns
+# amd64 but ansible_architecture maintains x86_64. Docker installation needs amd64
+  - name: "Conditional set of machine arch for docker to understand it correctly"
+    ansible.builtin.set_fact:
+      mach_arch: "{{ \"amd64\" if ansible_architecture == \"x86_64\" else ansible_architecture }}"
+      
+# Now add the repository (specific to the ubuntu version). The location of gpg file
+# has changed in the latest installation instructions 
+  - name: "Add Docker package repository"
+    ansible.builtin.apt_repository:
+      repo: deb [arch={{ mach_arch }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+      filename: docker   # gets stored under /etc/apt/sources.list.d/
+      state: present
+      update_cache: yes  # this is default where the repo is updated
+
+# now install the Docker runtime
+  - name: "Install Docker"
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: present
+      update_cache: yes  # will automatically first do apt update
+    loop:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+
+# Add the docker group, if it does not exist
+  - name: "Add a group called docker"
+    group:
+      name: docker
+      state: present
+
+# add user to docker group
+  - name: "Add user to Docker group"
+    user:
+      name: "{{ cloud['user'] }}"
+      append: yes
+      groups: docker
+
+# install docker python package
+  - name: "Install docker package via pip3"
+    pip:
+      name: "{{ item }}"
+      state: latest
+      # presumably the latest pip3 gets installed in /usr/local and not the /usr/bin
+      # executable: /usr/local/bin/pip3  # this forces to use pip3
+      # there were issues showing up with PyYAML coming in the way. Hence this
+      # other nonsensical hack
+      # extra_args:  --ignore-installed PyYAML
+    loop:    # in the other file we used loop (which is the newer approach)
+      - docker
+...

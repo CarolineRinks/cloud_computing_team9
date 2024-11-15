@@ -1,0 +1,20 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# CS 6381: Distributed Systems
+# Author: Aniruddha Gokhale
+# Created: Summer 2024
+#
+# This playbook will start firewalld
+#
+      
+  - name: "Start firewalld"
+    ansible.builtin.systemd_service:
+      name: firewalld
+      daemon_reload: true
+      state: started  # start it it
+      enabled: true  # enable on reboot
+    when: "cloud['platform']|string in 'chameleon'"
+      
+...

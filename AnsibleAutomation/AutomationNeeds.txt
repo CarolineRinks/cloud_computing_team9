@@ -1,0 +1,36 @@
+(1) IP addresses of bastion, masters and workers change; accordingly
+~/.ssh/config needs to get updated. Any prior ~/.ssh/known_hosts file needs to
+be either deleted OR the ssh-keygen with the -R option needs to be run so that
+cached entries are cleared
+
+(2) *_vars file has several params that may need to be updated. We might need
+to have a template and then generate such a file based on what we need
+
+(3) A template for Inventory directory will be needed and then this gets filled
+as the ansible scripts start executing.
+
+(4) config.toml file needs some common changes and some changes like priv
+registry
+
+(5) Which packages need to be installed on VMs need to be passed as a list
+param
+
+(6) Versions of docker, k8s etc keep changing and their installation steps
+slightly modified periodically. So, our child playbooks need to be updated
+every now and then.
+
+(7) There is a need to identify ubuntu version, machine arch
+
+(8) Note that all playbooks currently are geared toward Ubuntu based
+installation. 
+
+(9) Our chameleon vars file is tightly coupled to specific ubuntu version and
+architecture. What if we had heterogeneous set of machines?
+
+(10) Firewall rules may also differ. currently we have all the needed rules in
+one child playbook. It is possible to build a loop and pass a bunch of ports
+
+(11) When I tried to reuse the apparatus to mimic the 4 VM assignment scenario,
+I was locked into the cluster/master/worker logic. I had only one cluster and
+zero masters. So some scripts that save priv IP addresses etc got messed
+up. The naming also messed up.

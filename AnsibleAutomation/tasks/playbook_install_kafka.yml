@@ -1,0 +1,69 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Aniruddha Gokhale
+# Created: Spring 2021
+# Modified: Fall 2024
+#
+  # So as to avoid downloading the Kafka distribution, we choose to download
+  # it once on our control machine and then just copy it to targe machine.
+  # Otherwise we could have used the get_url builtin module
+  #- name: "Copy kafka distribution"
+  #  ansible.builtin.copy:
+  #    src: /vagrant/kafka_2.13-2.7.0.tgz
+  #    dest: "/home/{{ ansible_user }}/"
+
+  - name: "delete any older Kafka distribution"
+    ansible.builtin.file:
+      dest: "{{ item }}"
+      state: absent
+    with_fileglob:
+      - "/home/{{ ansible_user }}/kafka*"
+
+  - name: "Unarchive the Kafka distribution"
+    ansible.builtin.unarchive:
+      src: "/Users/{{ local_user }}/Downloads/kafka_2.13-{{ kafka['version'] }}.tgz"
+      dest: "/home/{{ ansible_user }}/"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+   
+  # This is somewhat of a hack approach to get this to work
+  # But the use of lineinfile is correct. We have to do this for multiple lines.
+  # - name: "Update broker id in server.properties file"
+  #   ansible.builtin.lineinfile:
+  #     path: "/home/{{ ansible_user }}/kafka_2.13-2.7.0/config/server.properties"
+  #     firstmatch: yes   # as such there will be only one instance of this
+  #     regexp: "^broker.id"
+  #     line: broker.id = {{ kafka[ansible_facts['hostname']] }}
+
+  # - name: "Update listeners in server.properties file"
+  #   ansible.builtin.lineinfile:
+  #     path: "/home/{{ ansible_user }}/kafka_2.13-2.7.0/config/server.properties"
+  #     firstmatch: yes   # as such there will be only one instance of this
+  #     regexp: "^#listeners"
+  #     line: listeners=PLAINTEXT://:9092
+
+  # - name: "Update advertised listeners in server.properties file"
+  #   ansible.builtin.lineinfile:
+  #     path: "/home/{{ ansible_user }}/kafka_2.13-2.7.0/config/server.properties"
+  #     firstmatch: yes   # as such there will be only one instance of this
+  #     regexp: "^#advertised.listeners"
+  #     line: advertised.listeners=PLAINTEXT://{{ ansible_host }}:9092
+
+  # - name: "Update listeners.security in server.properties file"
+  #   ansible.builtin.lineinfile:
+  #     path: "/home/{{ ansible_user }}/kafka_2.13-2.7.0/config/server.properties"
+  #     firstmatch: yes   # as such there will be only one instance of this
+  #     regexp: "^#listener.security"
+  #     line: listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+
+  # # We are going to run zookeeper on the first VM
+  # - name: "Update zookeeper.connect in server.properties file"
+  #   ansible.builtin.lineinfile:
+  #     path: "/home/{{ ansible_user }}/kafka_2.13-2.7.0/config/server.properties"
+  #     firstmatch: yes   # as such there will be only one instance of this
+  #     regexp: "^zookeeper.connect="
+  #     line: zookeeper.connect={{ cloud.vms[0].fip }}:2181
+
+...
+

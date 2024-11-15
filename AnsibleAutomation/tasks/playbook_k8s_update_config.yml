@@ -1,0 +1,127 @@
+---
+#
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2023
+#
+# Here we modify the periodSeconds and timeoutSeconds on all the kube-system components
+# 
+####  All API server related #####
+  - name: "Insert a longer health check of etcd by the kube api server"
+    ansible.builtin.lineinfile:
+      path: /etc/kubernetes/manifests/kube-apiserver.yaml
+      line: "    - --etcd-healthcheck-timeout=15s"
+      insertbefore: "[ ]*image: registry"
+
+  - name: "Insert a longer readiness check of etcd by the kube api server"
+    ansible.builtin.lineinfile:
+      path: /etc/kubernetes/manifests/kube-apiserver.yaml
+      line: "    - --etcd-readycheck-timeout=30s"
+      insertbefore: "[ ]*image: registry"
+
+  - name: "Modify initial delay on kube api server"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-apiserver.yaml
+      regexp: "initialDelaySeconds: 10"
+      replace: "initialDelaySeconds: 30"
+
+  - name: "Modify liveness periodSeconds on kube api server"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-apiserver.yaml
+      regexp: "periodSeconds: 10"
+      replace: "periodSeconds: 20"
+
+  - name: "Modify readiness periodSeconds on kube api server"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-apiserver.yaml
+      regexp: "periodSeconds: 1"
+      replace: "periodSeconds: 10"
+
+  - name: "Modify timeoutSeconds on kube api server"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-apiserver.yaml
+      regexp: "timeoutSeconds: 15"
+      replace: "timeoutSeconds: 30"
+
+####  All etcd related #####
+  - name: "Insert a longer election time out by etcd"
+    ansible.builtin.lineinfile:
+      path: /etc/kubernetes/manifests/etcd.yaml
+      line: "    - --election-timeout=25000"
+      insertbefore: "[ ]*image: registry"
+
+  - name: "Insert a longer heartbeat interval by etcd"
+    ansible.builtin.lineinfile:
+      path: /etc/kubernetes/manifests/etcd.yaml
+      line: "    - --heartbeat-interval=5000"
+      insertbefore: "[ ]*image: registry"
+
+  - name: "Modify initial delay on etcd"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/etcd.yaml
+      regexp: "initialDelaySeconds: 10"
+      replace: "initialDelaySeconds: 30"
+
+  - name: "Modify periodSeconds on etcd"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/etcd.yaml
+      regexp: "periodSeconds: 10"
+      replace: "periodSeconds: 20"
+
+  - name: "Modify timeoutSeconds on etcd"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/etcd.yaml
+      regexp: "timeoutSeconds: 15"
+      replace: "timeoutSeconds: 30"
+
+####  All controller related #####
+  - name: "Disable leader election on kube controller"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+      regexp: "--leader-elect=true"
+      replace: "--leader-elect=false"
+      
+  - name: "Modify initial delay on kube controller"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+      regexp: "initialDelaySeconds: 10"
+      replace: "initialDelaySeconds: 30"
+
+  - name: "Modify periodSeconds on kube controller"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+      regexp: "periodSeconds: 10"
+      replace: "periodSeconds: 20"
+
+  - name: "Modify timeoutSeconds on kube controller"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+      regexp: "timeoutSeconds: 15"
+      replace: "timeoutSeconds: 30"
+
+####  All scheduler related #####
+  - name: "Disable leader election on kube scheduler"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-scheduler.yaml
+      regexp: "--leader-elect=true"
+      replace: "--leader-elect=false"
+      
+  - name: "Modify initial delay on kube scheduler"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-scheduler.yaml
+      regexp: "initialDelaySeconds: 10"
+      replace: "initialDelaySeconds: 30"
+
+  - name: "Modify periodSeconds on kube scheduler"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-scheduler.yaml
+      regexp: "periodSeconds: 10"
+      replace: "periodSeconds: 20"
+
+  - name: "Modify timeoutSeconds on kube scheduler"
+    ansible.builtin.replace:
+      path: /etc/kubernetes/manifests/kube-scheduler.yaml
+      regexp: "timeoutSeconds: 15"
+      replace: "timeoutSeconds: 30"
+
+...

@@ -1,0 +1,47 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+# Modified: Spring 2021
+# Modified: Fall 2022
+# Modified: Fall 2023
+#
+# In this playbook we install packages via pip
+#
+  # Some of these are not needed on all VMs and so one
+  # may put a conditional instead of splitting this further 
+  - name: "Install a variety of packages via pip3"
+    pip:
+      name: "{{ item }}"
+      state: latest
+      # presumably the latest pip3 gets installed in /usr/local and not the /usr/bin
+      # executable: /usr/local/bin/pip3  # this forces to use pip3
+      # there were issues showing up with PyYAML coming in the way. Hence this
+      # other nonsensical hack
+      # extra_args:  --ignore-installed PyYAML
+    loop:    # in the other file we used loop (which is the newer approach)
+      - pip   # update pip
+      - setuptools
+      - wheel
+#      - pexpect    # needed for all the apt "expect" package
+#      - openstacksdk
+      - matplotlib
+      - pandas
+      - numpy
+      - pyzmq
+      - kafka-python
+      - numpy
+      - scikit-learn
+      - Pillow
+      - tensorflow
+      - opencv-python
+      - requests
+      - thread6
+     
+
+
+#     - couchdb
+...
+

@@ -1,0 +1,32 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+# Modified: Spring 2021
+# Modified: Summer 2022 (due to changes in var file)
+# Modified: Summer 2024 (registry image and port comes from a variable now)
+#
+# In this playbook we start a private registry
+#
+#
+
+# There is some error being thrown about unsupported http+docker with this
+# version of ansible, collection, etc. No idea, where the version mismatch is.
+# Exact error is: "msg": "Error connecting: Error while fetching server API version: Not supported URL scheme http+docker"
+
+  # - name: "Start private registry on k8s master"
+  #   community.docker.docker_container:
+  #     name: "{{ Docker['priv_reg_inst_name'] }}"
+  #     image: "{{ Docker['priv_reg_image'] }}"
+  #     detach: true
+  #     pull: true
+  #     restart_policy: "always"
+  #     published_ports: "{{ Docker['priv_reg_port'] }}:{{ Docker['priv_reg_port'] }}"
+
+# so for now we are using shell cmd
+  - name: "Start private registry on k8s master"
+    ansible.builtin.shell:
+      cmd: docker run --name {{ Docker['priv_reg_inst_name'] }} -d -p {{ Docker['priv_reg_port'] }}:{{ Docker['priv_reg_port'] }} --restart always {{ Docker['priv_reg_image'] }}
+
+...

@@ -1,0 +1,16 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+# Modified: Fall 2023
+#
+# In this playbook we taint the master node
+
+# They changed the taint name from master to control-plane
+# 
+  - name: "Join the k8s cluster"
+    when: "{{ cloud['master_fip']|string in ansible_ssh_host  }}"
+    shell: kubectl taint nodes {{ cloud['master'] }} node-role.kubernetes.io/control-plane:NoSchedule-
+
+...

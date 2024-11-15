@@ -1,0 +1,42 @@
+---
+#
+# Author: Aniruddha Gokhale
+# CS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# CS 6381: Distributed Systems Principles
+# Created: Summer 2024
+#
+
+# The goal of this playbook is to take the daemon json template and insert
+# the private IP addresses of all the master machines
+
+  - name: "set a fact to contain a double quote (could not directly use literal double quote)"
+    ansible.builtin.set_fact:
+      quote: '"'
+      
+  - name: "loop thru IP addresses of masters and build a comma separated string"
+    ansible.builtin.set_fact:
+      registry_list: "{{ registry_list|default (\"\") +  ((\", \") if idx > 0 else (\"\")) + quote + item|string +\":5000\" + quote }}"
+    loop: "{{ groups [K8s['masters_inv']] }}"
+    loop_control:
+      index_var: idx
+
+  - name: "Create daemon.json from template"
+    ansible.builtin.copy:
+      src: ./daemon_template.json
+      dest: ./daemon.json
+
+  - name: "update daemon file with registry info"
+    ansible.builtin.lineinfile:
+      path: "./daemon.json"
+      insertafter: "\"insecure-registries\" :"
+      firstmatch: true
+      line: "[{{ registry_list|string }}]"
+
+  - name: "replace single quote with double quote in daemon json file"
+    ansible.builtin.replace:
+      path: "./daemon.json"
+      regexp: \'
+      replace: '"'
+
+...
