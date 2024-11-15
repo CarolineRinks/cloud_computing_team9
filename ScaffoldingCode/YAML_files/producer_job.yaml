@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: producer-job
+spec:
+  parallelism: 5          # Number of job pods to run in parallel
+  completions: 5          # Total number of job completions needed
+  template:
+    spec:
+      containers:
+      - name: producer
+        image: 172.16.4.133:5000/team9/producer_image:latest
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name  # Sets POD_NAME to the unique pod name
+      restartPolicy: Never
+  backoffLimit: 1          # Number of retries before marking the job as failed
+

@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-consumer-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: db-consumer
+        image: 172.16.4.133:5000/team9/db_consumer_image:latest
+        env:
+        - name: MONGO_URI
+          value: "mongodb://root:example@mongodb:27017/cifarDatabase"
+      restartPolicy: Never
+  backoffLimit: 4

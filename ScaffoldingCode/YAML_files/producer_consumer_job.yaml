@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: producer-consumer-job
+spec:
+  parallelism: 1
+  completions: 1
+  template:
+    spec:
+      containers:
+      - name: consumer
+        image: 172.16.4.133:5000/team9/producer_consumer_image:latest
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+      restartPolicy: Never 
+  backoffLimit: 1  # Number of retries before marking the job as failed
