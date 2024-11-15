@@ -1,6 +1,9 @@
 # Deployment Setup
 
-VM1：IoT Source Producer (producer.py)
+IoT Source Producer:
+
+
+Kafka Broker: kafka-svc.yaml, kafka-deploy.yaml
 
 VM2：Kafka Broker, Zookeeper
 
