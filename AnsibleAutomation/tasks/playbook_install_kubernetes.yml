@@ -1,0 +1,177 @@
+---
+#
+# Author: Aniruddha Gokhale
+# CS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# CS 6381: Distributed Systems
+# Created: Fall 2020
+# Modified: Summer 2022
+# Modified: Fall 2023
+# Modified: Summer 2024  # some changes in k8s install
+#
+# In this playbook we install Kubernetes
+#
+# Current modifications based on instructions found at https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
+
+# the web site suggests holding the packages to this version. So, first we unhold so as to remove older ones
+# We are doing this in the next step now by passing a param to apt module
+  # - name: "Unhold packages current versions"
+  #   ansible.builtin.dpkg_selections:
+  #     name: "{{ item }}"
+  #     selection: install
+  #   loop:
+  #     - kubeadm
+  #     - kubelet
+  #     - kubectl
+
+# uninstall any older version of Kubernetes
+  - name: "Uninstall any older version of Kubernetes"
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: absent
+      allow_change_held_packages: true   # to unhold a held package
+      purge: true
+    loop:
+      - kubeadm
+      - kubelet
+      - kubectl
+      - kubernetes-cni
+
+# Remove any older version of the apt repository
+# has changed in the latest installation instructions 
+  - name: "Remove any older k8s package repository"
+    ansible.builtin.apt_repository:
+      repo: deb https://pkgs.k8s.io/core:/stable:/{{ k8s['version'] }}/deb/ 
+      filename: kubernetes   # gets stored under /etc/apt/sources.list.d/
+      state: absent
+      update_cache: yes  # this is default where the repo is updated
+
+# The following iptables stuff is mentioned at https://kubernetes.io/docs/setup/production-environment/container-runtimes/
+#
+# This is no longer mentioned in the documentation
+# ensure that iptables see bridged traffic
+#  - name: "Load br_netfilter"
+#    community.general.modprobe:
+#      name: br_netfilter
+#      state: present
+
+# This is no longer mentioned in the documentation
+#  - name: "Remove old version of modules k8s.conf"
+#    ansible.builtin.file:
+#      path: /etc/modules-load.d/k8s.conf
+#      state: absent
+      
+  - name: "Remove old version of sysctl k8s.conf"
+    ansible.builtin.file:
+      path: /etc/sysctl.d/k8s.conf
+      state: absent
+
+# These instructions are also gone in the v1.30 documentation
+# This maybe because the modules are already loaded in Ubuntu 22.04
+#  - name: "Set IP Tables"
+#    ansible.builtin.shell: |
+#      cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+#      overlay
+#      br_netfilter
+#      EOF
+#
+#      modprobe overlay
+#      modprobe br_netfilter
+#
+#      cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+#      net.bridge.bridge-nf-call-ip6tables = 1
+#      net.bridge.bridge-nf-call-iptables = 1
+#      EOF
+#      sysctl --system
+
+# Set IPv4 forwarding
+  - name: "Set IPv4 forwarding"
+    ansible.builtin.shell: |
+      cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+      net.ipv4.ip_forward = 1
+      EOF
+      sysctl --system
+
+# install pre requisite packages for Kubernetes. Some of these may already be there
+# and/or gotten installed when installing Docker
+  - name: "Install a variety of pre-reqs for Kubernetes"
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: latest
+      update_cache: yes    # basically do a apt-get update
+    loop:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+
+# Create the keyrings dir /etc/apt/keyrings. In newer Ubuntu releases
+# this directory is supposed to exist by default.
+#
+# This part is also newer compared to previous years
+# This does the step "sudo install -m 0755 -d /etc/apt/keyrings"
+  - name: "Create keyrings dir, if not present"
+    ansible.builtin.file:
+      path: /etc/apt/keyrings
+      state: directory  # creates dir if not present else sort of no-op
+      mode: '0755'
+      
+# But first delete any older version of gpg, if we have one.
+  - name: "Remove older version of k8s GPG apt key, if any"
+    ansible.builtin.file:
+      path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg  # This is the new location and extension
+      state: absent
+
+# Now add the new gpg key
+# The apt_key is getting deprecated. It is not clear how the gpg --dearmor is to be applied once
+# apt_key modules is gone.
+# GPG Key
+  - name: "Add Kubernetes GPG apt key" 
+    ansible.builtin.apt_key:
+      url: https://pkgs.k8s.io/core:/stable:/{{ k8s['version'] }}/deb/Release.key
+      keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      state: present
+    
+# Now add the repository (this has changed over the years)
+  - name: "Add package repository"
+    ansible.builtin.apt_repository:
+      repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s['version'] }}/deb/ /"
+      state: present
+      filename: kubernetes
+
+# now install Kubernetes
+  - name: "Now install Kubernetes"
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: present
+      update_cache: yes
+    loop:
+      - kubeadm
+      - kubelet
+      - kubectl
+      # - kubernetes-cni  # it is said that this is subsumed by the above
+
+# the web site suggests holding the packages to this version
+  - name: "Hold packages to the current versions"
+    ansible.builtin.dpkg_selections:
+      name: "{{ item }}"
+      selection: hold
+    loop:
+      - kubeadm
+      - kubelet
+      - kubectl
+
+# install kubernetes python package
+  - name: "Install kubernetes package via pip3"
+    pip:
+      name: "{{ item }}"
+      state: latest
+      # presumably the latest pip3 gets installed in /usr/local and not the /usr/bin
+      # executable: /usr/local/bin/pip3  # this forces to use pip3
+      # there were issues showing up with PyYAML coming in the way. Hence this
+      # other nonsensical hack
+      # extra_args:  --ignore-installed PyYAML
+    loop:    # in the other file we used loop (which is the newer approach)
+      - kubernetes
+...

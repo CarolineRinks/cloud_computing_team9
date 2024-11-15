@@ -1,0 +1,34 @@
+---
+#
+# Author: Aniruddha Gokhale
+# EECS 4287/5287: Principles of Cloud Computing
+# Created: Fall 2016
+# Modified: Fall 2018
+# Modified: Fall 2020
+# Modified: Summer 2022 (more print stmts)
+#
+# In this playbook we get facts about our local VM using master playbook
+#
+  - name: "Get facts of the VM"   # This is just for printing out.
+    ansible.builtin.debug:        # debug is used for printing information
+       var: ansible_facts       # ansible_facts is a built-in variable
+                                # that stores the collected value
+
+  - name: Print IPv4 data of VM   # This is just for printing out.
+    ansible.builtin.debug:        # debug is used for printing information
+       var: ansible_facts['default_ipv4']['address']
+                             # ansible_facts here is a huge nested dictionary
+                             # The IPv4 data is deeply embedded inside
+
+  # print some additional details like architecture, et.
+  - name: "Print some ansible specific results"
+    ansible.builtin.debug:  # Notice how variables are accessed (shown below)
+        msg: "{{ item }}"
+    loop:
+        - "Ansible architecture: {{ ansible_architecture }}"
+        - "Ansible distribution: {{ ansible_distribution }}"
+        - "Ansible distribution version: {{ ansible_distribution_version }}"
+        - "Ansible distribution major version: {{ ansible_distribution_major_version }}"
+        - "Ansible distribution release: {{ ansible_distribution_release }}"
+...
+

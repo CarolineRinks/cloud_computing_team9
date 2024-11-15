@@ -1,0 +1,20 @@
+- name: Create multiple VMs on the cloud
+  openstack.cloud.server:
+    state: "{{ item.state }}"   
+    availability_zone: "{{ item.availability_zone }}"  
+    name: "{{ item.name }}"
+    boot_from_volume: "{{ item.boot_from_volume }}"
+    image: "{{ item.image }}"  
+    flavor: "{{ item.flavor }}" 
+    key_name: "{{ item.key_name }}" 
+    security_groups: "{{ item.security_groups }}"  
+    network: "{{ item.network }}"  
+    reuse_ips: "{{ item.reuse_ips }}"
+    wait: "{{ item.wait }}" 
+    description: "{{ item.description }}"
+  loop: "{{ vm_list }}"  # Loop through the list of VMs
+
+- name: "Wait for connection to VMs"
+  ansible.builtin.wait_for_connection:
+  loop: "{{ vm_list }}"
+  when: item.wait

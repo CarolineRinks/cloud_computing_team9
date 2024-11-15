@@ -1,0 +1,233 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# CS 6381: Distributed Systems
+# Author: Aniruddha Gokhale
+# Created: Spring 2024
+# Modified: Summer 2024
+#
+# This playbook will set firewalld rules.
+#
+# The Chameleon images are no longer supporting ufw and have switched to
+# using firewalld
+
+  # K8s port usage is explained here: https://kubernetes.io/docs/reference/networking/ports-and-protocols/
+      
+  - name: "Firewalld for kube-apiserver, etcd"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "2379-2381/tcp"   # when I saw inside the files, I saw 2381 also
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for k8s ClusterIP"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "443/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for k8s APIserver"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "6443/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for kubelet API, Scheduler and Controller"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "10250/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for K8s kube proxy"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "10256/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for K8s controller manager"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "10257/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for kube Scheduler"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "10259/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for K8s RBAC"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      state: enabled
+      permanent: true
+      immediate: true
+      port: 8080/tcp
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for Flannel VXLAN"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "8285/udp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "Firewalld for Flannel"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "8472/udp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "Firewalld for Calico BGP"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "179/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "Firewalld for Calico Typha"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "5473/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "Firewalld for Calico Wireguard IPv4"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "51820/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "Firewalld for OVS VXLAN"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "4789/udp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "OVS to OpenFlow"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "6633-6653/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "OVS DB"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      state: enabled
+      permanent: true
+      immediate: true
+      port: 6632-6640/tcp
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "Firewalld for private docker registry"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "5000/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+     
+  - name: "Firewalld for NodePort services"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "30000-30200/tcp"  # for user services
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld for http"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      state: enabled
+      permanent: true
+      immediate: true
+      port: 80/tcp   
+    when: "cloud['platform']|string in 'chameleon'"
+ 
+  - name: "Firewalld for nginx ingress"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "8081/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+ 
+  - name: "Firewalld for prometheus"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "9113/tcp"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+ 
+  - name: "Firewalld to allow traceroute"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      port: "33434-33529/udp"  # for user services
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+      
+  - name: "Firewalld add vxlan.calico interface"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      interface: "vxlan.calico"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "Firewalld add cali* interfaces"
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      interface: "{{ item }}"
+      state: enabled
+      permanent: true
+      immediate: true
+    when: item is search ('cali')
+    loop: "{{ ansible_facts['interfaces'] }}"
+...

@@ -1,0 +1,73 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+# Modified: Spring 2021
+# Modified: Summer 2022 (more packages added)
+# Modified: Fall 2023 (we also update/upgrade, more packages)
+#
+# In this playbook we install packages via apt
+#
+  # - name: "Update and upgrade packages"
+  #   ansible.builtin.apt:
+  #     upgrade: "yes"
+  #     update_cache: true
+  #     autoremove: true
+  #     autoclean: true
+  #   when: ansible_host != "127.0.0.1"
+
+  - name: "Install basic python-specific packages via aptitude"
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: latest
+      update_cache: yes    # basically do a apt-get update
+    loop:
+      - python3-dev
+      - python3-pip
+    when: ansible_host != "127.0.0.1"
+
+  - name: "Install a variety of additional packages via aptitude"
+    ansible.builtin.apt:
+      name: "{{ item }}"
+      state: latest
+      update_cache: yes    # basically do a apt-get update
+    loop:
+      - build-essential  # a bunch of needed packages while debugging
+      - bison
+      - flex
+      - net-tools
+      - wget
+      - git
+      - ca-certificates
+      - curl
+      - apt-transport-https
+      - gnupg
+      - lsb-release
+      - net-tools
+      - dnsutils
+      - iputils-ping
+      - iputils-tracepath
+      - iputils-arping
+      - iputils-clockdiff
+      - bridge-utils
+      - inetutils-traceroute
+      - iptables
+      - iproute2
+#      - network-manager # this seems to no longer be on Chameleon images
+      - python3-apt   # do we need this? Things seem to hang a long time here.
+      - default-jdk  # java
+      - default-jre  # java
+      - jq           # needed during tainting
+      - libzmq3-dev  # for ZMQ
+      - libssl-dev  # these two needed for unbound package in OVS
+      - libexpat1-dev
+
+  # for some reason the above installation of pip is not installing the very
+  # latest pip3 and that is causing problems with openstacksdk installs. So
+  # this hack here :-(
+  - name: "Upgrade pip to latest version"
+    ansible.builtin.shell: python3 -m pip install --upgrade pip
+    when: ansible_host != "127.0.0.1"
+...

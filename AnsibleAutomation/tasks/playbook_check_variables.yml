@@ -1,0 +1,25 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE: 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+# Modified: Spring 2021
+# Modified: Fall 2023
+#
+    - name: "check if variable 'local_user' is defined"
+      ansible.builtin.fail: msg="Exiting because 'localuser' is not defined"
+      when: local_user is undefined
+
+    - name: check if variable cloud is defined
+      ansible.builtin.fail: msg="Exiting because 'cloud' is not defined"
+      when: cloud is undefined
+
+    - name: check if variable ubuntu is defined
+      ansible.builtin.fail: msg="Exiting because 'ubuntu' is not defined"
+      when: ubuntu is undefined
+
+    - name: check if variable k8s is defined
+      ansible.builtin.fail: msg="Exiting because 'k8s' is not defined"
+      when: K8s is undefined
+...

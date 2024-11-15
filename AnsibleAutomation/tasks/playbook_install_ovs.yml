@@ -1,0 +1,165 @@
+---
+#
+# Author: Aniruddha Gokhale
+# CS/ECE 4383/5383: Computer Networks
+# CS 4287/5287: Cloud Computing
+# CS 6381: Distributed Systems
+# Created: Fall 2023
+# Modified: Summer 2024 # download unbound, etc
+#
+# In this playbook we install Open Virtual Switch
+#
+
+# If done this way, although all packages seem to get deployed, still
+# there seems to be a problem getting the kernel module installed and
+# hence vxlans etc do not seem to show up as interfaces.
+#
+#
+# What I observed with mininet is that it is installing ovs from the source
+# by compiling it. So I think it is probably the route we need to take.
+
+  # - name: "Install Open Virtual Switch"
+  #   ansible.builtin.apt:
+  #     name: "{{ item }}"
+  #     state: latest
+  #     update_cache: yes    # basically do a apt-get update
+  #   loop:
+  #     - openvswitch-switch
+  #     - openvswitch-common
+  #     - openvswitch-switch-dpdk
+  #     - openvswitch-ipsec
+  #     - python3-openvswitch
+
+  # - name: "Remove older Open Virtual Switch"
+  #   ansible.builtin.apt:
+  #     name: "{{ item }}"
+  #     state: absent
+  #     update_cache: yes    # basically do a apt-get update
+  #   become: true 
+  #   loop:
+  #     - openvswitch-common
+  #     - openvswitch-switch
+  #     - openvswitch-switch-dpdk
+  #     - openvswitch-datapath-dkms
+  #     - openvswitch-pki
+  #     - openvswitch-ipsec
+  #     - openvswitch-controller
+  #     - python3-openvswitch
+
+  - name: "delete any older Unbound distribution"
+    ansible.builtin.file:
+      path: /home/{{ cloud['user'] }}/unbound-{{ ovs['unbound_version'] }}
+      state: absent
+
+  - name: "delete any older OVS distribution"
+    ansible.builtin.file:
+      dest: /home/{{ cloud['user'] }}/openvswitch-{{ ovs['version'] }}
+      state: absent
+      
+  # install some optional but helpful packages for OVS
+#   - name: "Install apt packages for unbound and ovs"
+#     ansible.builtin.apt:
+#       name: "{{ item }}"
+#       state: latest
+#       update_cache: yes    # basically do a apt-get update
+#     become: true 
+#     loop:
+#       - bison
+#       - flex
+#       - libssl-dev
+#       - libexpat1-dev
+#       - libcap-ng-dev
+#       - build-essential
+#       - fakeroot
+#       - debhelper
+#       - autoconf
+#       - automake
+#       - pkg-config
+#       - bzip2
+#       - openssl
+#       - libssl3
+#       - python3-all
+#       - procps
+#       - dkms
+#       - dh-python
+#       - dh-autoreconf
+#       - uuid-runtime
+# #      - python3-pyqt4
+#     when: ansible_host != "127.0.0.1"
+
+#   - name: "Install pip3 packages for ovs and unbound"
+#     pip:
+#       name: "{{ item }}"
+#       state: latest
+#     become: true
+#     loop:    # in the other file we used loop (which is the newer approach)
+#       - zope.interface
+# #      - python3-twisted-conch
+
+  - name: "Unzip the unbound package archive"
+    ansible.builtin.unarchive:
+      src: "/home/{{ local_user }}/Downloads/unbound-{{ ovs['unbound_version'] }}.tar.gz"
+      dest: "/home/{{ cloud['user'] }}/"
+      owner: "{{ cloud['user'] }}"
+      group: "{{ cloud['user'] }}"
+  
+  - name: "Configure unbound package archive"
+    ansible.builtin.shell:
+      cmd: ./configure
+      chdir: "/home/{{ cloud['user'] }}/unbound-{{ ovs['unbound_version'] }}"
+    
+  - name: "make unbound package"
+    community.general.make:
+      chdir: "/home/{{ cloud['user'] }}/unbound-{{ ovs['unbound_version'] }}"
+    
+  - name: "install unbound"
+    community.general.make:
+      chdir: "/home/{{ cloud['user'] }}/unbound-{{ ovs['unbound_version'] }}"
+      target: install
+    become: true
+    
+  - name: "Unzip the OVS package archive"
+    ansible.builtin.unarchive:
+      src: "/home/{{ local_user }}/Downloads/openvswitch-{{ ovs['version'] }}.tar.gz"
+      dest: "/home/{{ cloud['user'] }}/"
+      owner: "{{ cloud['user'] }}"
+      group: "{{ cloud['user'] }}"
+    
+  - name: "Configure OVS source"
+    ansible.builtin.shell:
+      cmd: ./configure
+      chdir: "/home/{{ cloud['user'] }}/openvswitch-{{ ovs['version'] }}"
+    
+  - name: "make OVS"
+    community.general.make:
+      chdir: "/home/{{ cloud['user'] }}/openvswitch-{{ ovs['version'] }}"
+    
+  - name: "install OVS"
+    community.general.make:
+      chdir: "/home/{{ cloud['user'] }}/openvswitch-{{ ovs['version'] }}"
+      target: install
+    become: true
+
+  - name: "Update PATH with scripts of ovs"
+    ansible.builtin.shell:
+      cmd: echo "export PATH=$PATH:/usr/local/share/openvswitch/scripts" >> "/home/{{ cloud['user'] }}/.bashrc"
+
+  - name: "Update LD LIBRARY PATH"
+    ansible.builtin.shell:
+      cmd: /sbin/ldconfig
+    become: true
+    
+  - name: "Start OVS daemons and DB"
+    ansible.builtin.shell:
+      cmd: /usr/local/share/openvswitch/scripts/ovs-ctl start
+    become: true
+
+  - name: "Remove the unbound and openvswitch directories"
+    ansible.builtin.file:
+      path: "/home/{{ cloud['user']}}/{{ item }}"
+      state: absent
+    loop:
+      - unbound-{{ ovs['unbound_version']  }}
+      - openvswitch-{{ ovs['version']  }}
+#    become: true 
+...

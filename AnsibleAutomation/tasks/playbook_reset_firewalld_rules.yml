@@ -1,0 +1,34 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# CS 6381: Distributed Systems
+# Author: Aniruddha Gokhale
+# Created: Summer 2024
+#
+# This playbook will reset desired firewalld rules.
+#
+# The Chameleon images are no longer supporting ufw and have switched to
+# using firewalld
+
+  - name: "Firewalld remove vxlan.calico interface"
+    become: true
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      interface: "vxlan.calico"
+      state: disabled
+      permanent: true
+      immediate: true
+    when: "cloud['platform']|string in 'chameleon'"
+
+  - name: "Firewalld remove cali* interfaces"
+    become: true
+    ansible.posix.firewalld:
+      zone: public   # this is default, but we still provide it just in case
+      interface: "{{ item }}"
+      state: disabled
+      permanent: true
+      immediate: true
+    when: item is search ('cali')
+    loop: "{{ ansible_facts['interfaces'] }}"
+...

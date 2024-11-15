@@ -1,0 +1,106 @@
+# ubuntu:
+# K8s:
+cloud:
+    project: "CH-822922"
+    redo: MyredoVMs
+    inventory: CloudVMs
+    user: cc
+    platform: chameleon
+
+kafka:
+    version: 3.8.0
+
+K8s:
+    version: "v1.30" # As of summer 2024.
+    masters_inv: K8s_Masters   # our inventory file
+    workers_inv: K8s_Workers   # our inventory file
+    clusters: 1   # these many clusters 
+    masters: 1   # that many replicated masters per cluster
+    workers: 10   # that many workers per cluster
+    cni: "cilium"   # We are going to use this CNI. Choices are flannel, calico and canal
+    pod_network: "10.244.0.0/16"  # this is default used by Flannel (and canal)
+    ctr_cfg: config.toml   # containerd modified config.toml file for private registries
+    teams:
+        - instr
+        - ta
+        - team1
+        - team2
+
+Docker:
+    config: daemon.json  # docker config for private registries
+    priv_reg_inst_name: "team-9-registry"
+    priv_reg_image: "registry:latest"
+    priv_reg_port: 5000
+
+vm_list:
+  - name: team9-vm1
+    security_groups:
+      - enable_ssh
+      - default
+    key_name: cc_f24
+    description: "VM 1 for team 9"
+    availability_zone: nova
+    network: CH-822922-net
+    flavor: m1.medium
+    auto_ips: False
+    state: "present"
+    wait: yes
+    reuse_ips: False
+    boot_from_volume: False
+    image: CC-Ubuntu22.04
+    name_prefix: Cloud-
+  
+  - name: team9-vm2
+    security_groups:
+      - enable_ssh
+      - default
+    key_name: cc_f24
+    description: "VM 2 for team 9"
+    availability_zone: nova
+    network: CH-822922-net
+    flavor: m1.medium
+    auto_ips: False
+    state: "present"
+    wait: yes
+    reuse_ips: False
+    boot_from_volume: False
+    image: CC-Ubuntu22.04
+    name_prefix: Cloud-
+
+  - name: team9-vm3
+    security_groups:
+      - enable_ssh
+      - default
+    key_name: cc_f24
+    description: "VM 3 for team 9"
+    availability_zone: nova
+    network: CH-822922-net
+    flavor: m1.medium
+    auto_ips: False
+    state: "present"
+    wait: yes
+    reuse_ips: False
+    boot_from_volume: False
+    image: CC-Ubuntu22.04
+    name_prefix: Cloud-
+
+  - name: team9-vm4
+    security_groups:
+      - enable_ssh
+      - default
+    key_name: cc_f24
+    description: "VM 4 for team 9"
+    availability_zone: nova
+    network: CH-822922-net
+    flavor: m1.medium
+    auto_ips: False
+    state: "present"
+    wait: yes
+    reuse_ips: False
+    boot_from_volume: False
+    image: CC-Ubuntu22.04
+    name_prefix: Cloud-
+
+
+
+

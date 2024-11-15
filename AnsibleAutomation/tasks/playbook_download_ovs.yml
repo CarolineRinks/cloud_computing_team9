@@ -1,0 +1,25 @@
+---
+#
+# Author: Aniruddha Gokhale
+# CS/ECE 4383/5383: Computer Networks
+# CS 4287/5287: Cloud Computing
+# CS 6381: Distributed Systems
+# Created: Summer 2024
+#
+# In this playbook we download source distribution for
+# Open Virtual Switch and related packages
+#
+
+
+# Download the Unbounded distribution
+  - name: "Download Unbound distribution"
+    ansible.builtin.get_url:
+      url: https://nlnetlabs.nl/downloads/unbound/unbound-{{ ovs['unbound_version'] }}.tar.gz
+      dest: /home/{{ local_user }}/Downloads/
+
+# Download the Open Virtual Switch distribution
+  - name: "Download OVS distribution"
+    ansible.builtin.get_url:
+      url: https://www.openvswitch.org/releases/openvswitch-{{ ovs['version'] }}.tar.gz
+      dest: /home/{{ local_user }}/Downloads/
+

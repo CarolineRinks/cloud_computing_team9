@@ -1,0 +1,23 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Aniruddha Gokhale
+# Created: Summer 2022
+#
+
+  # Note that for now we are hardcoding what we want to save.
+  # In future, either we can pass the variable we want to save,
+  # what value are we looking for, and in which 
+  # Create a dummy host and save whatever we want for this
+  # host into that variable. Here we are interested in
+  # storing priv IP addr of the K8S master.
+  #
+  # Could be called an incredible hack. Found on a website.
+  
+  - name: "Save private registry's IP addr for later use"
+    ansible.builtin.add_host:
+       name: "COMPNW_MASTER"  # used to pass values
+       # If more variables are needed, add each here.
+       private_ip: "{{ ansible_facts['default_ipv4']['address'] }}"
+
+...

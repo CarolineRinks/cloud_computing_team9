@@ -1,0 +1,21 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+# Modified: Spring 2021
+# Modified: Summer 2022 (changes due to vars file changes)
+# Modified: Summer 2024 (several changes including automation moved to another file)
+#
+# In this playbook we install a private insecure registry
+# on each machine. Everyone points to a private registry on
+# the K8s master machine.
+#
+
+# add a daemon.json file to /etc/docker directory
+  - name: "Add daemon.json file to /etc/docker directory"
+    copy:
+      src: "./{{ Docker['config'] }}"
+      dest: /etc/docker/daemon.json
+
+...

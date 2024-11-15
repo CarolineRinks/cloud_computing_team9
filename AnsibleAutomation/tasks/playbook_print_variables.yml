@@ -1,0 +1,17 @@
+---
+#
+# EECS 4287/5287: Principles of Cloud Computing
+# CS/ECE 4383/5383: Computer Networks
+# Author: Aniruddha Gokhale
+# Created: Fall 2020
+# Modified: Spring 2021
+# Modified: Fall 2023
+#
+# print all the supplied variables
+    - name: Print all the variables supplied to this play
+      ansible.builtin.debug:
+          msg:
+            - "Ubuntu = {{ ubuntu }}"
+            - "Cloud = {{ cloud }}"
+            - "K8s = {{ K8s }}"
+...

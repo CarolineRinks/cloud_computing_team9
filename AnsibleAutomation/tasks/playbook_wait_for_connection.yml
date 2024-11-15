@@ -1,0 +1,13 @@
+---
+#
+# Author: Aniruddha Gokhale
+# EECS 4287/5287: Principles of Cloud Computing
+# Created: Spring 2021
+#
+# In this playbook we wait for connection to the cloud VM
+#
+# Max timeout is 5 mins (600 secs)
+
+  - name : "Wait for Connection to VM"
+    ansible.builtin.wait_for_connection:
+...
