@@ -1,0 +1,13 @@
+# Docker file to for producer container
+# The FROM clause tells docker what underlying base to use.
+FROM python:3.10
+# Install the application dependencies
+#WORKDIR /root/cloud_computing_team9/ScaffoldingCode
+# Copy the application dependencies file to the current directory
+COPY producer_consumer_requirements.txt .
+# Install the application dependencies
+RUN pip install --no-cache-dir -r producer_consumer_requirements.txt
+# Copy the producer code to the current directory
+COPY producer_consumer.py .
+# Run the server code as the final step of starting the container
+CMD ["python3", "producer_consumer.py"]
