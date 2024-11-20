@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: export-data-job
+  namespace: team9
+spec:
+  template:
+    spec:
+      containers:
+      - name: export-script
+        image: 192.168.1.208:5000/team9/export_data_image:latest
+        env:
+        - name: MONGO_URI
+          value: "mongodb://mongodb:27017/"
+      restartPolicy: Never
+  backoffLimit: 1
