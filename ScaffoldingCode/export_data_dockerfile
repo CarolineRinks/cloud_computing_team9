@@ -1,0 +1,5 @@
+FROM python:3.10
+RUN pip install pymongo
+COPY export_data.py .
+CMD ["python", "export_data.py"]
+
