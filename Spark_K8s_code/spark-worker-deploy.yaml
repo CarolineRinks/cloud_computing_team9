@@ -24,7 +24,7 @@ spec:                     # This is the specification where we can even put the 
       hostname: spark-worker-host  # we need it to set the SPARK_LOCAL_IP
       containers:
         - name: spark-worker       # used to name container
-          image: 129.114.25.80:5000/my-spark:latest   # this is the image in private registry
+          image: 192.168.1.64:5000/team9/spark_example_image:latest  # this is the image in private registry
           ports:            # Spark worker port
             - containerPort: 7078  # worker will use this port instead of random port
             - containerPort: 7079  # used by block manager
@@ -40,7 +40,7 @@ spec:                     # This is the specification where we can even put the 
             # the SPARK_HOME env set in docker image is not accessible for the command line
             # below. So had to set it here.
             - name: SPARK_HOME  
-              value: "/spark-3.1.1-bin-hadoop3.2"
+              value: "/opt/spark-3.5.3-bin-hadoop3"
 
           imagePullPolicy: Always  # This forces the node to pull the image
           command: ["$(SPARK_HOME)/sbin/start-worker.sh"]
