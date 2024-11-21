@@ -24,10 +24,10 @@ spec:                     # This is the specification
       hostname: spark-driver-host
       nodeSelector:
         # we force k8s to run this driver on this node
-        kubernetes.io/hostname: kubemaster
+        kubernetes.io/hostname: cloud-c4m1
       containers:
         - name: spark-driver       # used to name container
-          image: 129.114.25.80:5000/my-spark:latest   # this is the image in private registry
+          image: 192.168.1.64:5000/team9/spark_example_image:latest   # this is the image in private registry
           imagePullPolicy: Always  # This forces the node to pull the image
           env:
             - name: SPARK_LOCAL_IP
@@ -35,7 +35,7 @@ spec:                     # This is the specification
             # the SPARK_HOME env set in docker image is not accessible for the command line
             # below. So had to set it here.
             - name: SPARK_HOME  
-              value: "/spark-3.1.1-bin-hadoop3.2"
+              value: "/opt/spark-3.5.3-bin-hadoop3"
 
           ports:            # Spark driver port
             - containerPort: 4040  # the dashboard
